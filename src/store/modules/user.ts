@@ -23,6 +23,7 @@ export const useUserStore = defineStore('userStore', () => {
   */
   const rememberPassword = ref(false)                    // 是否记住密码
   const savedPassword = ref('')                          // 已保存的密码
+  const savedUsername = ref('')                          // 已保存的用户名
   const info = ref<Partial<UserInfo>>({})               // 用户信息
   const searchHistory = ref<MenuListType[]>([])         // 搜索历史记录
   const accessToken = ref('')                           // 访问令牌
@@ -42,15 +43,16 @@ export const useUserStore = defineStore('userStore', () => {
     if (sys) {
       sys = JSON.parse(sys)
       const { info: userInfo, isLogin: loginStatus, language: lang, searchHistory: history,
-        rememberPassword: lockStatus, savedPassword: pwd } = sys.user
+        rememberPassword: remberPwd, savedPassword: pwd,savedUsername: username } = sys.user
 
       // 恢复各项状态，使用空值兜底
       info.value = userInfo || {}
       isLogin.value = loginStatus || false
-      rememberPassword.value = lockStatus || false
+      rememberPassword.value = remberPwd || false
       language.value = lang || LanguageEnum.ZH
       searchHistory.value = history || []
       savedPassword.value = pwd || ''
+      savedUsername.value = username || ''
       accessToken.value = sessionStorage.getItem('accessToken') || ''
     }
   }
@@ -66,6 +68,7 @@ export const useUserStore = defineStore('userStore', () => {
         language: language.value,
         rememberPassword: rememberPassword.value,
         savedPassword: savedPassword.value,
+        savedUsername: savedUsername.value,
         searchHistory: searchHistory.value,
         worktab: getWorktabState.value,
         setting: getSettingState.value
@@ -142,8 +145,6 @@ export const useUserStore = defineStore('userStore', () => {
       // 重置所有状态
       info.value = {}
       isLogin.value = false
-      rememberPassword.value = false
-      savedPassword.value = ''
       accessToken.value = ''
       sessionStorage.removeItem('accessToken')
       useWorktabStore().opened = []
@@ -160,6 +161,7 @@ export const useUserStore = defineStore('userStore', () => {
     isLogin,
     rememberPassword,
     savedPassword,
+    savedUsername,
     info,
     searchHistory,
     accessToken,

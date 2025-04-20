@@ -54,12 +54,20 @@ axiosInstance.interceptors.response.use(
     if (axios.isCancel(error)) {
       console.log('repeated request: ' + error.message)
     } else {
-      const errorMessage = error.response?.data.message
-      ElMessage.error(
-        errorMessage
-          ? `${errorMessage} ${EmojiText[500]}`
-          : `请求超时或服务器异常！${EmojiText[500]}`
-      )
+      // 处理 401 错误
+      if (error.response?.status === 401) {
+        const userStore = useUserStore()
+        // 清除用户信息
+        userStore.isLogin = false
+        ElMessage.error('登录已过期，请重新登录')
+      } else {
+        const errorMessage = error.response?.data.message
+        ElMessage.error(
+          errorMessage
+            ? `${errorMessage} ${EmojiText[500]}`
+            : `请求超时或服务器异常！${EmojiText[500]}`
+        )
+      }
     }
     return Promise.reject(error)
   }
