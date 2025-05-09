@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url'
 export default ({ mode }) => {
   const root = process.cwd()
   const env = loadEnv(mode, root)
+  console.log('env', env)
   const { VITE_VERSION, VITE_PORT, VITE_BASE_URL, VITE_API_URL } = env
 
   console.log(`🚀 API_URL = ${VITE_API_URL}`)
@@ -23,7 +24,7 @@ export default ({ mode }) => {
     define: {
       __APP_VERSION__: JSON.stringify(VITE_VERSION)
     },
-    base: VITE_BASE_URL,  
+    base: VITE_BASE_URL,
     server: {
       cors: true, // 允许跨域
       port: parseInt(VITE_PORT),
@@ -31,7 +32,7 @@ export default ({ mode }) => {
         '/api': {
           target: VITE_API_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '') 
+          rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
     },

@@ -3,11 +3,20 @@ import { BaseResult } from '@/types/axios'
 import { UserInfo } from '@/types/store'
 
 export class UserService {
-  // 模拟登录接口
+  // 登录接口
   static login(options: { body: string }): Promise<BaseResult> {
     const data = JSON.parse(options.body)
     return request.post({
       url: '/api/auth/login',
+      data
+    })
+  }
+
+  // 注册接口
+  static register(options: { body: string }): Promise<BaseResult> {
+    const data = JSON.parse(options.body)
+    return request.post({
+      url: '/api/auth/register',
       data
     })
   }

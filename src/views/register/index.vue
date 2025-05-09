@@ -15,47 +15,41 @@
           <h3 class="title">{{ $t('register.title') }}</h3>
           <p class="sub-title">{{ $t('register.subTitle') }}</p>
           <el-form ref="formRef" :model="formData" :rules="rules" label-position="top">
-            <el-form-item prop="username">
-              <el-input
-                v-model.trim="formData.username"
-                :placeholder="$t('register.placeholder[0]')"
-                size="large"
-              />
+            <!-- 昵称 -->
+            <el-form-item prop="nickname">
+              <el-input v-model.trim="formData.nickname" placeholder="昵称" size="large" />
             </el-form-item>
-
+            <!-- 用户名 -->
+            <el-form-item prop="username">
+              <el-input v-model.trim="formData.username" placeholder="用户名" size="large" />
+            </el-form-item>
+            <!-- 密码 -->
             <el-form-item prop="password">
               <el-input
                 v-model.trim="formData.password"
-                :placeholder="$t('register.placeholder[1]')"
+                placeholder="密码"
                 size="large"
                 type="password"
                 autocomplete="off"
               />
             </el-form-item>
-
+            <!-- 确认密码 -->
             <el-form-item prop="confirmPassword">
               <el-input
                 v-model.trim="formData.confirmPassword"
-                :placeholder="$t('register.placeholder[2]')"
+                placeholder="确认密码"
                 size="large"
                 type="password"
                 autocomplete="off"
                 @keyup.enter="register"
               />
             </el-form-item>
-
-            <el-form-item prop="agreement">
-              <el-checkbox v-model="formData.agreement">
-                {{ $t('register.agreeText') }}
-                <router-link
-                  style="color: var(--main-color); text-decoration: none"
-                  to="/privacy-policy"
-                  >{{ $t('register.privacyPolicy') }}</router-link
-                >
-              </el-checkbox>
-            </el-form-item>
-
-            <div style="margin-top: 15px">
+            <!-- 性别 -->
+            <el-radio-group v-model="formData.gender">
+              <el-radio :label="1">男</el-radio>
+              <el-radio :label="2">女</el-radio>
+            </el-radio-group>
+            <div>
               <el-button
                 class="register-btn"
                 size="large"
@@ -84,11 +78,10 @@
 <script setup lang="ts">
   import LeftView from '@/components/Pages/Login/LeftView.vue'
   import AppConfig from '@/config'
+  import { UserService } from '@/api/usersApi'
   import { ElMessage } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
-  import { useI18n } from 'vue-i18n'
-
-  const { t } = useI18n()
+  import { ApiStatus } from '@/utils/http/status'
 
   const router = useRouter()
   const formRef = ref<FormInstance>()
@@ -98,14 +91,28 @@
 
   const formData = reactive({
     username: '',
+    nickname: '',
     password: '',
     confirmPassword: '',
-    agreement: false
+    gender: ''
   })
+
+  // 密码强度验证
+  const validateStrongPassword = (password: string): boolean => {
+    const hasNumber = /[0-9]/.test(password)
+    const hasUpper = /[A-Z]/.test(password)
+    const hasLower = /[a-z]/.test(password)
+    const hasSpecial = /[!@#%&(){};':",.<>?]/.test(password)
+    const minLength = 8 // 你可以根据需要设置最小长度
+
+    return hasNumber && hasUpper && hasLower && hasSpecial && password.length >= minLength
+  }
 
   const validatePass = (rule: any, value: string, callback: any) => {
     if (value === '') {
-      callback(new Error(t('register.placeholder[1]')))
+      callback(new Error('密码不能为空'))
+    } else if (!validateStrongPassword(value)) {
+      callback(new Error('密码应包含数字、大写字母、小写字母、特殊字符')) // 密码强度不足提示
     } else {
       if (formData.confirmPassword !== '') {
         formRef.value?.validateField('confirmPassword')
@@ -116,9 +123,17 @@
 
   const validatePass2 = (rule: any, value: string, callback: any) => {
     if (value === '') {
-      callback(new Error(t('register.rule[0]')))
+      callback(new Error('确认密码不能为空'))
     } else if (value !== formData.password) {
-      callback(new Error(t('register.rule[1]')))
+      callback(new Error('两次输入的密码不匹配'))
+    } else {
+      callback()
+    }
+  }
+
+  const validateGender = (rule: any, value: number, callback: any) => {
+    if (value === null) {
+      callback(new Error('请选择性别')) // 请选择性别
     } else {
       callback()
     }
@@ -126,26 +141,24 @@
 
   const rules = reactive<FormRules>({
     username: [
-      { required: true, message: t('register.placeholder[0]'), trigger: 'blur' },
-      { min: 3, max: 20, message: t('register.rule[2]'), trigger: 'blur' }
+      { required: true, message: '用户名不能为空', trigger: 'blur' },
+      { min: 3, max: 32, message: '用户名长度应在3-32位', trigger: 'blur' },
+      {
+        pattern: /^[\p{L}\p{N}]+$/u,
+        message: '昵称只能包含字母和数字', // 只允许字母和数字
+        trigger: 'blur'
+      }
+    ],
+    nickname: [
+      { required: true, message: '昵称不能为空', trigger: 'blur' },
+      { min: 5, max: 24, message: '昵称长度应在5-24位', trigger: 'blur' }
     ],
     password: [
       { required: true, validator: validatePass, trigger: 'blur' },
-      { min: 6, message: t('register.rule[3]'), trigger: 'blur' }
+      { min: 8, max: 64, message: '密码长度应在8-64位', trigger: 'blur' }
     ],
     confirmPassword: [{ required: true, validator: validatePass2, trigger: 'blur' }],
-    agreement: [
-      {
-        validator: (rule: any, value: boolean, callback: any) => {
-          if (!value) {
-            callback(new Error(t('register.rule[4]')))
-          } else {
-            callback()
-          }
-        },
-        trigger: 'change'
-      }
-    ]
+    gender: [{ required: true, validator: validateGender, trigger: 'change' }]
   })
 
   const register = async () => {
@@ -155,12 +168,22 @@
       await formRef.value.validate()
       loading.value = true
 
-      // 模拟注册请求
-      setTimeout(() => {
-        loading.value = false
+      const res = await UserService.register({
+        body: JSON.stringify({
+          nickname: formData.nickname,
+          username: formData.username,
+          password: formData.password,
+          gender: formData.gender
+        })
+      })
+
+      if (res.code === ApiStatus.success) {
         ElMessage.success('注册成功')
-        toLogin()
-      }, 1000)
+        loading.value = false
+        setTimeout(() => {
+          toLogin()
+        }, 1000) // 1000毫秒后执行
+      }
     } catch (error) {
       console.log('验证失败', error)
     }

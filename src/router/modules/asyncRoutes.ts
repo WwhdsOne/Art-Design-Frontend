@@ -1,5 +1,4 @@
 import { upgradeLogList } from '@/mock/upgradeLog'
-import { RoutesAlias } from './routesAlias'
 import { MenuListType } from '@/types/menu'
 import { WEB_LINKS } from '@/utils/links'
 
@@ -18,9 +17,9 @@ export const asyncRoutes: MenuListType[] = [
     id: 1,
     name: 'Dashboard',
     path: '/dashboard',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
-      title: 'menus.dashboard.title',
+      title: '普通菜单',
       icon: '&#xe721;',
       keepAlive: false
     },
@@ -29,7 +28,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 101,
         path: 'console',
         name: 'Console',
-        component: RoutesAlias.Dashboard,
+        component: '/dashboard/console',
         meta: {
           title: 'menus.dashboard.console',
           keepAlive: true
@@ -39,7 +38,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 102,
         path: 'analysis',
         name: 'Analysis',
-        component: RoutesAlias.Analysis,
+        component: '/dashboard/analysis',
         meta: {
           title: 'menus.dashboard.analysis',
           keepAlive: true
@@ -49,7 +48,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 103,
         path: 'ecommerce',
         name: 'Ecommerce',
-        component: RoutesAlias.Ecommerce,
+        component: '/dashboard/ecommerce',
         meta: {
           title: 'menus.dashboard.ecommerce',
           keepAlive: true,
@@ -62,7 +61,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 5,
     path: '/widgets',
     name: 'Widgets',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.widgets.title',
       icon: '&#xe81a;',
@@ -73,7 +72,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 503,
         path: 'icon-list',
         name: 'IconList',
-        component: RoutesAlias.IconList,
+        component: '/widgets/IconList',
         meta: {
           title: 'menus.widgets.iconList',
           keepAlive: true
@@ -83,7 +82,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 504,
         path: 'icon-selector',
         name: 'IconSelector',
-        component: RoutesAlias.IconSelector,
+        component: '/widgets/IconSelector',
         meta: {
           title: 'menus.widgets.iconSelector',
           keepAlive: true
@@ -93,7 +92,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 505,
         path: 'image-crop',
         name: 'ImageCrop',
-        component: RoutesAlias.ImageCrop,
+        component: '/widgets/ImageCrop',
         meta: {
           title: 'menus.widgets.imageCrop',
           keepAlive: true
@@ -103,7 +102,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 506,
         path: 'excel',
         name: 'Excel',
-        component: RoutesAlias.Excel,
+        component: '/widgets/Excel',
         meta: {
           title: 'menus.widgets.excel',
           keepAlive: true
@@ -113,7 +112,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 507,
         path: 'video',
         name: 'Video',
-        component: RoutesAlias.Video,
+        component: '/widgets/Video',
         meta: {
           title: 'menus.widgets.video',
           keepAlive: true
@@ -123,7 +122,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 508,
         path: 'count-to',
         name: 'CountTo',
-        component: RoutesAlias.CountTo,
+        component: '/widgets/CountTo',
         meta: {
           title: 'menus.widgets.countTo',
           keepAlive: false
@@ -133,7 +132,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 509,
         path: 'wang-editor',
         name: 'WangEditor',
-        component: RoutesAlias.WangEditor,
+        component: '/widgets/WangEditor',
         meta: {
           title: 'menus.widgets.wangEditor',
           keepAlive: true
@@ -143,7 +142,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 510,
         path: 'watermark',
         name: 'Watermark',
-        component: RoutesAlias.Watermark,
+        component: '/widgets/Watermark',
         meta: {
           title: 'menus.widgets.watermark',
           keepAlive: true
@@ -153,7 +152,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 511,
         path: 'context-menu',
         name: 'ContextMenu',
-        component: RoutesAlias.ContextMenu,
+        component: '/widgets/ContextMenu',
         meta: {
           title: 'menus.widgets.contextMenu',
           keepAlive: true
@@ -163,7 +162,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 512,
         path: 'qrcode',
         name: 'Qrcode',
-        component: RoutesAlias.Qrcode,
+        component: '/widgets/Qrcode',
         meta: {
           title: 'menus.widgets.qrcode',
           keepAlive: true
@@ -173,7 +172,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 513,
         path: 'drag',
         name: 'Drag',
-        component: RoutesAlias.Drag,
+        component: '/widgets/Drag',
         meta: {
           title: 'menus.widgets.drag',
           keepAlive: true
@@ -183,7 +182,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 514,
         path: 'text-scroll',
         name: 'TextScroll',
-        component: RoutesAlias.TextScroll,
+        component: '/widgets/TextScroll',
         meta: {
           title: 'menus.widgets.textScroll',
           keepAlive: true
@@ -193,10 +192,11 @@ export const asyncRoutes: MenuListType[] = [
         id: 515,
         path: 'fireworks',
         name: 'Fireworks',
-        component: RoutesAlias.Fireworks,
+        component: '/widgets/Fireworks',
         meta: {
           title: 'menus.widgets.fireworks',
           keepAlive: true,
+          showBadge: true,
           showTextBadge: 'Hot'
         }
       },
@@ -219,7 +219,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 126,
     path: '/template',
     name: 'Template',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.template.title',
       icon: '&#xe860;',
@@ -230,7 +230,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12602,
         path: 'cards',
         name: 'Cards',
-        component: RoutesAlias.Cards,
+        component: '/template/Cards',
         meta: {
           title: 'menus.template.cards',
           keepAlive: false
@@ -240,7 +240,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12603,
         path: 'banners',
         name: 'Banners',
-        component: RoutesAlias.Banners,
+        component: '/template/Banners',
         meta: {
           title: 'menus.template.banners',
           keepAlive: false
@@ -250,7 +250,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12604,
         path: 'charts',
         name: 'Charts',
-        component: RoutesAlias.Charts,
+        component: '/template/Charts',
         meta: {
           title: 'menus.template.charts',
           keepAlive: false
@@ -260,7 +260,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12609,
         path: 'map',
         name: 'Map',
-        component: RoutesAlias.Map,
+        component: '/template/Map',
         meta: {
           title: 'menus.template.map',
           keepAlive: true,
@@ -271,7 +271,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12601,
         path: 'chat',
         name: 'Chat',
-        component: RoutesAlias.Chat,
+        component: '/template/Chat',
         meta: {
           title: 'menus.template.chat',
           keepAlive: true
@@ -281,7 +281,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12605,
         path: 'calendar',
         name: 'Calendar',
-        component: RoutesAlias.Calendar,
+        component: '/template/Calendar',
         meta: {
           title: 'menus.template.calendar',
           keepAlive: true
@@ -291,7 +291,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 12622,
         path: 'pricing',
         name: 'Pricing',
-        component: RoutesAlias.Pricing,
+        component: '/template/Pricing',
         meta: {
           title: 'menus.template.pricing',
           keepAlive: true,
@@ -304,7 +304,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 4,
     path: '/article',
     name: 'Article',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.article.title',
       icon: '&#xe7ae;',
@@ -315,7 +315,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 202,
         path: 'article-list',
         name: 'ArticleList',
-        component: RoutesAlias.ArticleList,
+        component: '/article/ArticleList',
         meta: {
           title: 'menus.article.articleList',
           keepAlive: true,
@@ -338,7 +338,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 204,
         path: 'detail',
         name: 'ArticleDetail',
-        component: RoutesAlias.ArticleDetail,
+        component: '/article/ArticleDetail',
         meta: {
           title: 'menus.article.articleDetail',
           isHide: true,
@@ -349,7 +349,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 205,
         path: 'comment',
         name: 'Comment',
-        component: RoutesAlias.Comment,
+        component: '/article/Comment',
         meta: {
           title: 'menus.article.comment',
           keepAlive: true
@@ -359,7 +359,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 201,
         path: 'article-publish',
         name: 'ArticlePublish',
-        component: RoutesAlias.ArticlePublish,
+        component: '/article/ArticlePublish',
         meta: {
           title: 'menus.article.articlePublish',
           keepAlive: true,
@@ -378,9 +378,9 @@ export const asyncRoutes: MenuListType[] = [
     id: 2,
     name: 'User',
     path: '/user',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
-      title: 'menus.user.title',
+      title: '用户管理',
       icon: '&#xe86e;',
       keepAlive: false
     },
@@ -389,9 +389,9 @@ export const asyncRoutes: MenuListType[] = [
         id: 301,
         path: 'account',
         name: 'Account',
-        component: RoutesAlias.Account,
+        component: '/user/Account',
         meta: {
-          title: 'menus.user.account',
+          title: '账号管理',
           keepAlive: true
         }
       },
@@ -399,9 +399,9 @@ export const asyncRoutes: MenuListType[] = [
         id: 302,
         path: 'department',
         name: 'Department',
-        component: RoutesAlias.Department,
+        component: '/user/Department',
         meta: {
-          title: 'menus.user.department',
+          title: '部门管理',
           keepAlive: false
         }
       },
@@ -409,9 +409,9 @@ export const asyncRoutes: MenuListType[] = [
         id: 303,
         path: 'role',
         name: 'Role',
-        component: RoutesAlias.Role,
+        component: '/user/Role',
         meta: {
-          title: 'menus.user.role',
+          title: '角色权限',
           keepAlive: true
         }
       },
@@ -419,9 +419,9 @@ export const asyncRoutes: MenuListType[] = [
         id: 304,
         path: 'user',
         name: 'UserCenter',
-        component: RoutesAlias.UserCenter,
+        component: '/user/User',
         meta: {
-          title: 'menus.user.userCenter',
+          title: '个人中心',
           isHide: true,
           keepAlive: true,
           isHideTab: true
@@ -433,7 +433,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 3,
     path: '/menu',
     name: 'Menu',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.menu.title',
       icon: '&#xe8a4;',
@@ -444,7 +444,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 401,
         path: 'menu',
         name: 'Menus',
-        component: RoutesAlias.Menu,
+        component: '/menu/Menu',
         meta: {
           title: 'menus.menu.menu',
           icon: '&#xe8a4;',
@@ -472,7 +472,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 411,
         path: 'permission',
         name: 'Permission',
-        component: RoutesAlias.Permission,
+        component: '/menu/Permission',
         meta: {
           title: 'menus.menu.permission',
           icon: '&#xe831;',
@@ -512,7 +512,7 @@ export const asyncRoutes: MenuListType[] = [
             id: 40201,
             path: 'menu1',
             name: 'NestedMenu1',
-            component: RoutesAlias.NestedMenu1,
+            component: '/menu/nested/Menu1',
             meta: {
               title: 'menus.menu.menu1',
               icon: '&#xe676;',
@@ -534,7 +534,7 @@ export const asyncRoutes: MenuListType[] = [
                 id: 4020201,
                 path: 'menu2-1',
                 name: 'NestedMenu2-1',
-                component: RoutesAlias.NestedMenu21,
+                component: '/menu/nested/menu2/Menu2-1',
                 meta: {
                   title: 'menus.menu.menu21',
                   icon: '&#xe676;',
@@ -558,7 +558,7 @@ export const asyncRoutes: MenuListType[] = [
                 id: 4020301,
                 path: 'menu3-1',
                 name: 'NestedMenu3-1',
-                component: RoutesAlias.NestedMenu31,
+                component: '/menu/nested/menu3/Menu3-1',
                 meta: {
                   title: 'menus.menu.menu31',
                   icon: '&#xe676;',
@@ -580,7 +580,7 @@ export const asyncRoutes: MenuListType[] = [
                     id: 402030201,
                     path: 'menu3-2-1',
                     name: 'NestedMenu3-2-1',
-                    component: RoutesAlias.NestedMenu321,
+                    component: '/menu/nested/menu3/menu3-2/Menu3-2-1',
                     meta: {
                       title: 'menus.menu.menu321',
                       icon: '&#xe676;',
@@ -599,7 +599,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 18,
     path: '/result',
     name: 'Result',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.result.title',
       icon: '&#xe715;',
@@ -610,7 +610,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 401,
         path: 'success',
         name: 'Success',
-        component: RoutesAlias.Success,
+        component: '/result/Success',
         meta: {
           title: 'menus.result.success',
           keepAlive: true
@@ -620,7 +620,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 402,
         path: 'fail',
         name: 'Fail',
-        component: RoutesAlias.Fail,
+        component: '/result/Fail',
         meta: {
           title: 'menus.result.fail',
           keepAlive: true
@@ -632,7 +632,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 8,
     path: '/exception',
     name: 'Exception',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.exception.title',
       icon: '&#xe820;',
@@ -643,7 +643,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 801,
         path: '403',
         name: '403',
-        component: RoutesAlias.Exception403,
+        component: '/exception/403',
         meta: {
           title: 'menus.exception.forbidden',
           keepAlive: true
@@ -653,7 +653,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 802,
         path: '404',
         name: '404',
-        component: RoutesAlias.Exception404,
+        component: '/exception/404',
         meta: {
           title: 'menus.exception.notFound',
           keepAlive: true
@@ -663,7 +663,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 803,
         path: '500',
         name: '500',
-        component: RoutesAlias.Exception500,
+        component: '/exception/500',
         meta: {
           title: 'menus.exception.serverError',
           keepAlive: true
@@ -675,7 +675,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 9,
     path: '/system',
     name: 'System',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.system.title',
       icon: '&#xe7b9;',
@@ -686,7 +686,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 901,
         path: 'setting',
         name: 'Setting',
-        component: RoutesAlias.Setting,
+        component: '/system/Setting',
         meta: {
           title: 'menus.system.setting',
           keepAlive: true
@@ -696,7 +696,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 902,
         path: 'api',
         name: 'Api',
-        component: RoutesAlias.Api,
+        component: '/system/Api',
         meta: {
           title: 'menus.system.api',
           keepAlive: true
@@ -706,7 +706,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 903,
         path: 'log',
         name: 'Log',
-        component: RoutesAlias.Log,
+        component: '/system/Log',
         meta: {
           title: 'menus.system.log',
           keepAlive: true
@@ -718,7 +718,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 10,
     path: '/safeguard',
     name: 'Safeguard',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.safeguard.title',
       icon: '&#xe816;',
@@ -729,7 +729,7 @@ export const asyncRoutes: MenuListType[] = [
         id: 1010,
         path: 'server',
         name: 'Server',
-        component: RoutesAlias.Server,
+        component: '/safeguard/Server',
         meta: {
           title: 'menus.safeguard.server',
           keepAlive: true
@@ -741,7 +741,7 @@ export const asyncRoutes: MenuListType[] = [
     id: 12,
     name: '',
     path: '',
-    component: RoutesAlias.Home,
+    component: '/index/index',
     meta: {
       title: 'menus.help.title',
       icon: '&#xe719;',

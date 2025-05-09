@@ -15,21 +15,21 @@ import { MenuListType } from '@/types/menu'
  */
 export const useUserStore = defineStore('userStore', () => {
   // 状态定义
-  const language = ref<LanguageEnum>(LanguageEnum.ZH)    // 当前语言
-  const isLogin = ref(false)                             // 登录状态
+  const language = ref<LanguageEnum>(LanguageEnum.ZH) // 当前语言
+  const isLogin = ref(false) // 登录状态
   /*
     当 rememberPassword 为 true 时，为登录时启用记住密码
     用户输入的密码会更新到 savedPassword 中
   */
-  const rememberPassword = ref(false)                    // 是否记住密码
-  const savedPassword = ref('')                          // 已保存的密码
-  const savedUsername = ref('')                          // 已保存的用户名
-  const info = ref<Partial<UserInfo>>({})               // 用户信息
-  const searchHistory = ref<MenuListType[]>([])         // 搜索历史记录
-  const accessToken = ref('')                           // 访问令牌
+  const rememberPassword = ref(false) // 是否记住密码
+  const savedPassword = ref('') // 已保存的密码
+  const savedUsername = ref('') // 已保存的用户名
+  const info = ref<Partial<UserInfo>>({}) // 用户信息
+  const searchHistory = ref<MenuListType[]>([]) // 搜索历史记录
+  const accessToken = ref('') // 访问令牌
 
   // 计算属性
-  const getUserInfo = computed(() => info.value)                    // 获取用户信息
+  const getUserInfo = computed(() => info.value) // 获取用户信息
   const getSettingState = computed(() => useSettingStore().$state) // 获取设置状态
   const getWorktabState = computed(() => useWorktabStore().$state) // 获取工作区状态
 
@@ -42,8 +42,15 @@ export const useUserStore = defineStore('userStore', () => {
     let sys = getSysStorage()
     if (sys) {
       sys = JSON.parse(sys)
-      const { info: userInfo, isLogin: loginStatus, language: lang, searchHistory: history,
-        rememberPassword: remberPwd, savedPassword: pwd,savedUsername: username } = sys.user
+      const {
+        info: userInfo,
+        isLogin: loginStatus,
+        language: lang,
+        searchHistory: history,
+        rememberPassword: remberPwd,
+        savedPassword: pwd,
+        savedUsername: username
+      } = sys.user
 
       // 恢复各项状态，使用空值兜底
       info.value = userInfo || {}
@@ -151,7 +158,7 @@ export const useUserStore = defineStore('userStore', () => {
       saveUserData()
       sessionStorage.removeItem('iframeRoutes')
       router.push('/login')
-    }, 300)
+    })
   }
 
   // 返回所有状态和方法
