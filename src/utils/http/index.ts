@@ -5,17 +5,24 @@ import EmojiText from '../emojo'
 import { BaseResult } from '@/types/axios'
 const axiosInstance = axios.create({
   timeout: 15000,
-  withCredentials: true, // 异步请求携带cookie
-  transformRequest: [(data) => JSON.stringify(data)], // 请求数据转换为 JSON 字符串
-  validateStatus: (status) => status >= 200 && status < 300, // 只接受 2xx 的状态码
+  withCredentials: true,
+  validateStatus: (status) => status >= 200 && status < 300,
+
+  // ✅ 不要 transformRequest，axios 内部会自动处理 JSON / FormData
+  transformRequest: undefined,
+
   headers: {
-    get: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
-    post: { 'Content-Type': 'application/json;charset=utf-8' }
+    get: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+    },
+    // ✅ post 这块别设置固定 Content-Type，或者设置后在拦截器里覆盖
+    post: {}
   },
+
   transformResponse: [
     (data, headers) => {
       const contentType = headers['content-type']
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType?.includes('application/json')) {
         try {
           return JSON.parse(data)
         } catch {
@@ -32,19 +39,21 @@ axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
     const { accessToken } = useUserStore()
 
-    // 如果 token 存在，则设置请求头
     if (accessToken) {
-      request.headers.set({
-        'Content-Type': 'application/json',
-        Authorization: accessToken
-      })
+      request.headers.set('Authorization', accessToken)
+
+      // 仅当数据不是 FormData 时，才设置为 application/json
+
+      if (!(request.data instanceof FormData)) {
+        request.headers.set('Content-Type', 'application/json')
+      }
     }
 
-    return request // 返回修改后的配置
+    return request
   },
   (error) => {
-    ElMessage.error(`服务器异常！ ${EmojiText[500]}`) // 显示错误消息
-    return Promise.reject(error) // 返回拒绝的 Promise
+    ElMessage.error(`服务器异常！ ${EmojiText[500]}`)
+    return Promise.reject(error)
   }
 )
 

@@ -23,8 +23,8 @@ export interface BaseResult<T = any> {
 
 // 分页数据结构，继承基础结果结构
 export interface PaginationResult<T> extends BaseResult {
-  currentPage: number // 当前页
-  pageSize: number // 每页条数
+  page: number // 当前页
+  size: number // 每页条数
   lastPage: number // 总页数
   total: number // 总条数
   data: T

@@ -5,14 +5,27 @@ export interface UserInfo {
   id: number
   realname: string
   nickname: string
+  username: string
   gender: number
   phone: string
-  address : string
+  address: string
   introduction: string
   occupation: string
-  tags : string[]
+  tags: string[]
   avatar: string
   email: string
+  status: number
+  createdAt: string
+  Roles: RoleInfo[]
+}
+
+// 角色信息
+export interface RoleInfo {
+  id: number
+  name: string
+  code: string
+  description: string
+  status: number
 }
 
 // 系统主题样式（light | dark）
