@@ -179,7 +179,7 @@
 
         try {
           const res = await UserService.login({
-            body: JSON.stringify({
+            data: JSON.stringify({
               username: formData.username,
               password: formData.password
             })

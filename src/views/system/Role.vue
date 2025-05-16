@@ -2,11 +2,11 @@
   <div class="page-content">
     <el-row>
       <el-col :xs="24" :sm="12" :lg="6">
-        <el-input placeholder="部门名称"></el-input>
+        <el-input v-model="searchForm.name" placeholder="角色名称"></el-input>
       </el-col>
       <div style="width: 12px"></div>
       <el-col :xs="24" :sm="12" :lg="6" class="el-col2">
-        <el-button v-ripple>搜索</el-button>
+        <el-button v-ripple @click="fetchTableData()">搜索</el-button>
         <el-button @click="showDialog('add')" v-ripple>新增角色</el-button>
       </el-col>
     </el-row>
@@ -14,7 +14,8 @@
     <art-table :data="tableData">
       <template #default>
         <el-table-column label="角色名称" prop="name" />
-        <el-table-column label="描述" prop="des" />
+        <el-table-column label="描述" prop="description" />
+        <el-table-column label="角色码" prop="code" />
         <el-table-column label="状态" prop="status">
           <template #default="scope">
             <el-tag :type="scope.row.status === 1 ? 'primary' : 'info'">
@@ -22,9 +23,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="date">
+        <el-table-column label="创建时间" prop="createdAt">
           <template #default="scope">
-            {{ formatDate(scope.row.date) }}
+            {{ formatDate(scope.row.createdAt) }}
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100px">
@@ -53,8 +54,11 @@
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
-        <el-form-item label="描述" prop="des">
-          <el-input v-model="form.des" type="textarea" :rows="3" />
+        <el-form-item label="角色码" prop="code">
+          <el-input v-model="form.code" />
+        </el-form-item>
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="form.description" type="textarea" :rows="3" />
         </el-form-item>
         <el-form-item label="状态">
           <el-switch v-model="form.status" />
@@ -90,6 +94,37 @@
   import type { FormInstance, FormRules } from 'element-plus'
   import { formatMenuTitle } from '@/utils/menu'
 
+  import { onMounted } from 'vue'
+  import { RoleService } from '@/api/roleApi'
+  const tableData = ref<any[]>([])
+  const currentPage = ref(1)
+  const pageSize = ref(5)
+  const total = ref(0)
+
+  const searchForm = reactive({
+    name: ''
+  })
+
+  // 数据获取逻辑提取成函数
+  const fetchTableData = async () => {
+    const res = await RoleService.getRolePage({
+      data: JSON.stringify({
+        page: currentPage.value,
+        size: pageSize.value,
+        ...searchForm
+      })
+    })
+    tableData.value = res.data.data
+    total.value = res.data.total
+    pageSize.value = res.data.size
+    currentPage.value = res.data.page
+  }
+
+  // 初始化
+  onMounted(() => {
+    fetchTableData()
+  })
+
   const dialogVisible = ref(false)
   const permissionDialog = ref(false)
   const menuList = computed(() => useMenuStore().getMenuList)
@@ -99,111 +134,22 @@
   const rules = reactive<FormRules>({
     name: [
       { required: true, message: '请输入角色名称', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+      { min: 2, max: 20, message: '长度最多为 10 个字符', trigger: 'blur' }
     ],
-    des: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
+    code: [
+      { required: true, message: '请输入角色码', trigger: 'blur' },
+      { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+    ],
+    description: [{ required: true, message: '请输入角色描述', trigger: 'blur' }]
   })
 
   const form = reactive({
     id: '',
     name: '',
-    des: '',
+    description: '',
+    code: '',
     status: true
   })
-
-  const tableData = reactive([
-    {
-      name: '超级管理员',
-      allow: '全部权限',
-      des: '拥有系统全部权限',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '董事会部',
-      allow: '自定义',
-      des: '负责董事会部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '监事会部',
-      allow: '自定义',
-      des: '负责监事会部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 0
-    },
-    {
-      name: '市场部',
-      allow: '自定义',
-      des: '负责市场部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '人力资源部',
-      allow: '自定义',
-      des: '负责人力资源部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '财务部',
-      allow: '自定义',
-      des: '负责财务部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '公关部',
-      allow: '自定义',
-      des: '负责公关部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 0
-    },
-    {
-      name: '广告部',
-      allow: '自定义',
-      des: '负责广告部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '营销',
-      allow: '自定义',
-      des: '负责营销相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '设计部',
-      allow: '自定义',
-      des: '负责设计部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '开发部',
-      allow: '自定义',
-      des: '负责开发部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '测试部',
-      allow: '自定义',
-      des: '负责测试部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    },
-    {
-      name: '安保部',
-      allow: '自定义',
-      des: '负责安保部相关工作的管理者',
-      date: '2021-01-08 12:30:45',
-      status: 1
-    }
-  ])
 
   const dialogType = ref('add')
 
@@ -214,12 +160,14 @@
     if (type === 'edit' && row) {
       form.id = row.id
       form.name = row.name
-      form.des = row.des
+      form.description = row.description
       form.status = row.status === 1
+      form.code = row.code
     } else {
       form.id = ''
       form.name = ''
-      form.des = ''
+      form.description = ''
+      form.code = ''
       form.status = true
     }
   }
@@ -230,7 +178,7 @@
     } else if (item.key === 'edit') {
       showDialog('edit', row)
     } else if (item.key === 'delete') {
-      deleteRole()
+      deleteRole(row.id)
     }
   }
 
@@ -243,14 +191,26 @@
     label: (data: any) => formatMenuTitle(data.meta?.title) || ''
   }
 
-  const deleteRole = () => {
+  const deleteRole = (roleID: number) => {
     ElMessageBox.confirm('确定删除该角色吗？', '删除确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'error'
-    }).then(() => {
-      ElMessage.success('删除成功')
     })
+      .then(() => {
+        // 在这里调用删除角色的函数
+        RoleService.deleteRoleByID({
+          data: roleID
+        }).then((res) => {
+          if (res.code === 200) {
+            fetchTableData()
+            ElMessage.success('删除成功')
+          }
+        })
+      })
+      .catch(() => {
+        ElMessage.info('已取消删除')
+      })
   }
 
   const handleSubmit = async (formEl: FormInstance | undefined) => {
@@ -259,9 +219,42 @@
     await formEl.validate((valid) => {
       if (valid) {
         const message = dialogType.value === 'add' ? '新增成功' : '修改成功'
-        ElMessage.success(message)
-        dialogVisible.value = false
-        formEl.resetFields()
+        if (dialogType.value === 'add') {
+          RoleService.createRole({
+            data: JSON.stringify({
+              name: form.name,
+              description: form.description,
+              code: form.code,
+              status: form.status ? 1 : 2
+            })
+          }).then((res) => {
+            if (res.code === 200) {
+              fetchTableData()
+              ElMessage.success(message)
+              dialogVisible.value = false
+              formEl.resetFields()
+            }
+          })
+        } else {
+          RoleService.updateRole({
+            data: JSON.stringify({
+              id: form.id,
+              name: form.name,
+              description: form.description,
+              code: form.code,
+              status: form.status ? 1 : 2
+            })
+          }).then((res) => {
+            if (res.code === 200) {
+              fetchTableData()
+              ElMessage.success(message)
+              dialogVisible.value = false
+              formEl.resetFields()
+            } else {
+              ElMessage.error('更新失败')
+            }
+          })
+        }
       }
     })
   }

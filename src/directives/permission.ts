@@ -1,5 +1,6 @@
 import { router } from '@/router'
 import { App, Directive } from 'vue'
+import { AuthMark } from '@/types/menu'
 
 /**
  * 权限指令
@@ -11,11 +12,11 @@ const authDirective: Directive = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
     // 从当前路由的 meta 信息中获取权限列表，如果没有则默认为空数组
     // authList 结构示例: ['add' ,'edit' ]
-    const authList = (router.currentRoute.value.meta.authList as Array<{ auth_mark: string }>) || []
+    const authList = (router.currentRoute.value.meta.authList as Array<AuthMark>) || []
 
     // 检查当前绑定的权限值是否存在于权限列表中
     // binding.value 是指令的绑定值，例如 v-auth="'add'" 中的 'add'
-    const hasPermission = authList.some((item) => item === binding.value)
+    const hasPermission = authList.some((item) => item.code === binding.value)
 
     // 如果没有权限，则从 DOM 中移除该元素
     if (!hasPermission) {

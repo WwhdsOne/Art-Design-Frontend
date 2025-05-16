@@ -13,8 +13,14 @@ export type MenuListType = {
     link?: string // 链接
     isIframe?: boolean // 是否是 iframe
     keepAlive: boolean // 是否缓存
-    authList?: Array // 可操作权限
+    authList?: Array<AuthMark> // 可操作权限
     isInMainContainer?: boolean // 是否在主容器中
   }
   children?: MenuListType[] // 子菜单
+}
+
+export type AuthMark = {
+  id: number // 权限ID
+  name: string // 权限名称
+  code: string // 权限标识
 }

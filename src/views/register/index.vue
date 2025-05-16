@@ -169,7 +169,7 @@
       loading.value = true
 
       const res = await UserService.register({
-        body: JSON.stringify({
+        data: JSON.stringify({
           nickname: formData.nickname,
           username: formData.username,
           password: formData.password,

@@ -10,7 +10,7 @@
       <template #top>
         <el-form :model="searchForm" ref="searchFormRef" label-width="82px">
           <el-row :gutter="20">
-            <form-input label="性名" prop="name" v-model="searchForm.realname" />
+            <form-input label="姓名" prop="name" v-model="searchForm.realname" />
             <form-input label="手机号" prop="phone" v-model="searchForm.phone" />
             <form-input label="邮箱" prop="email" v-model="searchForm.email" />
             <form-input label="账号" prop="account" v-model="searchForm.username" />
@@ -116,7 +116,7 @@
   // 数据获取逻辑提取成函数
   const fetchTableData = async () => {
     const res = await UserService.getUserPage({
-      body: JSON.stringify({
+      data: JSON.stringify({
         page: currentPage.value,
         size: pageSize.value,
         ...searchForm,

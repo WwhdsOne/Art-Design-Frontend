@@ -419,7 +419,7 @@
     // 保存后进行更新操作
     if (!isEdit.value) {
       UserService.updateUser({
-        body: JSON.stringify(form)
+        data: JSON.stringify(form)
       }).then((res) => {
         if (res.code === 200) {
           ElMessage.success('更新成功')
@@ -435,7 +435,7 @@
     isEditPwd.value = !isEditPwd.value
     if (!isEditPwd.value) {
       UserService.updatePassword({
-        body: JSON.stringify(pwdForm)
+        data: JSON.stringify(pwdForm)
       }).then((res) => {
         if (res.code === 200) {
           ElMessage.success('修改密码成功')
