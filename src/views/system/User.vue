@@ -41,16 +41,24 @@
           label="用户名"
           prop="avatar"
           #default="scope"
-          width="300px"
+          width="200px"
           v-if="columns[0].show"
         >
           <div class="user" style="display: flex; align-items: center">
             <img class="avatar" :src="scope.row.avatar" />
             <div>
-              <p class="user-name">{{ scope.row.realname }}</p>
-              <p class="email">{{ scope.row.email }}</p>
+              <p class="user-name">{{ scope.row.username }}</p>
+              <p>{{ scope.row.realname }}</p>
             </div>
           </div>
+        </el-table-column>
+        <el-table-column
+          label="邮箱"
+          prop="email"
+          show-overflow-tooltip
+          width="200"
+          v-if="columns[6].show"
+        >
         </el-table-column>
         <el-table-column label="手机号" prop="phone" v-if="columns[1].show" />
         <el-table-column
@@ -67,6 +75,19 @@
             <el-tag :type="getTagType(scope.row.status)">
               {{ buildTagText(scope.row.status) }}</el-tag
             >
+          </template>
+        </el-table-column>
+        <el-table-column label="角色" prop="role" v-if="columns[3].show">
+          <template #default="scope">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <div class="role-tags">
+                  <el-tag v-for="(role, index) in scope.row.roles" :key="index" type="success">
+                    {{ role.name }}
+                  </el-tag>
+                </div>
+              </el-col>
+            </el-row>
           </template>
         </el-table-column>
         <el-table-column label="创建日期" prop="created_at" sortable v-if="columns[5].show" />
@@ -181,7 +202,8 @@
     { name: '性别', show: true },
     { name: '角色', show: true },
     { name: '状态', show: true },
-    { name: '创建日期', show: true }
+    { name: '创建日期', show: true },
+    { name: '邮箱', show: true }
   ])
 
   const searchFormRef = ref<FormInstance>()
@@ -281,6 +303,11 @@
 </script>
 
 <style lang="scss" scoped>
+  .role-tags {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
   .page-content {
     width: 100%;
     height: 100%;
