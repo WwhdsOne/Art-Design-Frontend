@@ -36,4 +36,20 @@ export class RoleService {
       url: `/api/role/delete/${options.data}` // 将 data 拼接到 URL 路径中
     })
   }
+
+  // 获取角色对应的菜单
+  static getRoleMenu(options: { data: number }): Promise<BaseResult> {
+    return request.post({
+      url: `/api/role/getRoleMenu/${options.data}` // 将 data 拼接到 URL 路径中
+    })
+  }
+
+  // 更新角色对应的菜单
+  static updateRoleMenu(options: { data: any }): Promise<BaseResult> {
+    // ✅ 直接使用 options.data 字符串
+    return request.post({
+      url: '/api/role/updateRoleMenuBinding',
+      data: options.data
+    })
+  }
 }

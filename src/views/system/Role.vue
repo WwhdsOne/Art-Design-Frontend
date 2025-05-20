@@ -23,9 +23,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" prop="createdAt">
+        <el-table-column label="创建时间" prop="created_at">
           <template #default="scope">
-            {{ formatDate(scope.row.createdAt) }}
+            {{ formatDate(scope.row.created_at) }}
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="100px">
@@ -75,27 +75,34 @@
     <el-dialog v-model="permissionDialog" title="菜单权限" width="30%">
       <div :style="{ maxHeight: '500px', overflowY: 'scroll' }">
         <el-tree
+          ref="menuTreeRef"
           :data="menuList"
           show-checkbox
           node-key="id"
-          :default-expanded-keys="[1, 2, 3, 4, 5, 6, 7, 8]"
-          :default-checked-keys="[1, 2, 3]"
           :props="defaultProps"
+          :check-strictly="true"
         />
+        <!-- 父子不关联！！！ 记得写文档总结 -->
       </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="permissionDialog = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmitRoleMenuBinding()">提交</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/Form/ButtonMore.vue'
-  import { useMenuStore } from '@/store/modules/menu'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
-  import { formatMenuTitle } from '@/utils/menu'
+  import { ElTree } from 'element-plus'
 
   import { onMounted } from 'vue'
   import { RoleService } from '@/api/roleApi'
+  import { RoleInfo } from '@/types/store'
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
   const pageSize = ref(5)
@@ -127,8 +134,6 @@
 
   const dialogVisible = ref(false)
   const permissionDialog = ref(false)
-  const menuList = computed(() => useMenuStore().getMenuList)
-
   const formRef = ref<FormInstance>()
 
   const rules = reactive<FormRules>({
@@ -172,9 +177,9 @@
     }
   }
 
-  const buttonMoreClick = (item: ButtonMoreItem, row: any) => {
+  const buttonMoreClick = (item: ButtonMoreItem, row: RoleInfo) => {
     if (item.key === 'permission') {
-      showPermissionDialog()
+      showPermissionDialog(row.id)
     } else if (item.key === 'edit') {
       showDialog('edit', row)
     } else if (item.key === 'delete') {
@@ -182,13 +187,53 @@
     }
   }
 
-  const showPermissionDialog = () => {
+  // const menuList = computed(() => useMenuStore().getMenuList)
+  interface SimpleMenu {
+    id: string
+    title: string
+    children?: SimpleMenu[]
+    parend_id: number
+  }
+  const menuList = ref<SimpleMenu[]>([]) // 菜单树
+  const menuTreeRef = ref<InstanceType<typeof ElTree>>()
+
+  const checkedKeys = ref([]) // 选中的 key
+  const currentRoleID = ref('')
+  const showPermissionDialog = async (roleID: number) => {
     permissionDialog.value = true
+    currentRoleID.value = String(roleID)
+    try {
+      const res = await RoleService.getRoleMenu({ data: roleID })
+      // 转换 id 为字符串（如果你后端是字符串形式）
+      menuList.value = res.data.menus
+      checkedKeys.value = res.data.has_menu_ids
+      // 等待 DOM 更新后再调用 setCheckedKeys
+      nextTick(() => {
+        menuTreeRef.value?.setCheckedKeys(checkedKeys.value)
+      })
+    } catch (error) {
+      console.error('加载角色权限失败', error)
+    }
   }
 
+  const handleSubmitRoleMenuBinding = async () => {
+    RoleService.updateRoleMenu({
+      data: {
+        role_id: currentRoleID.value,
+        menu_ids: menuTreeRef.value?.getCheckedKeys()
+      }
+    }).then((res) => {
+      if (res.code === 200) {
+        ElMessage.success('权限绑定成功')
+        permissionDialog.value = false
+      }
+    })
+  }
+
+  // el-tree 显示配置项
   const defaultProps = {
     children: 'children',
-    label: (data: any) => formatMenuTitle(data.meta?.title) || ''
+    label: 'title' // 注意是 title，不是 name
   }
 
   const deleteRole = (roleID: number) => {
