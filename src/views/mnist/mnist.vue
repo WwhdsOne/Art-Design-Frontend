@@ -100,15 +100,38 @@
       if (res.code === 200) {
         ElMessage.success('识别任务提交成功')
 
-        // 提交成功后，等待1.5秒后重新查询该条数据
-        setTimeout(() => {
+        // 提交成功后，等待1秒后重新查询该条数据
+        let attempts = 0
+        const maxAttempts = 3
+
+        const checkRecognition = () => {
           MnistService.getMnistById(item.id).then((res) => {
             if (res.code === 200 && res.data) {
-              // 更新 item 的属性
-              Object.assign(item, res.data)
+              if (res.data.label !== null) {
+                // 更新 item 的属性
+                Object.assign(item, res.data)
+                ElMessage.success('识别成功')
+              } else {
+                attempts++
+                if (attempts < maxAttempts) {
+                  setTimeout(checkRecognition, 1000)
+                } else {
+                  ElMessage.error('识别失败')
+                }
+              }
+            } else {
+              attempts++
+              if (attempts < maxAttempts) {
+                setTimeout(checkRecognition, 1000)
+              } else {
+                ElMessage.error('识别失败')
+              }
             }
           })
-        }, 1500)
+        }
+
+        // 开始第一次查询
+        checkRecognition()
       }
       item.label = res.data.label
     })

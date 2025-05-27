@@ -12,9 +12,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="path" label="路由" />
-
-        <el-table-column label="编辑时间" prop="date"> 2022-3-12 12:00:00 </el-table-column>
-
+        <el-table-column label="编辑时间" prop="date">
+          <template #default="scope">
+            <span v-if="scope.row.update_at">{{ scope.row.update_at }}</span>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
           <template #default="scope">
             <button-table type="add" v-auth="'add'" @click="showModel('menu')" />
@@ -172,7 +174,8 @@
     authName: '',
     authLabel: '',
     authIcon: '',
-    authSort: 1
+    authSort: 1,
+    update_at: ''
   })
   const iconType = ref(IconTypeEnum.UNICODE)
 

@@ -88,7 +88,8 @@
               <el-checkbox v-model="formData.rememberPassword">{{
                 $t('login.rememberPwd')
               }}</el-checkbox>
-              <router-link to="/forget-password">{{ $t('login.forgetPwd') }}</router-link>
+              <!-- 忘记密码 todo后期可以补充这个功能 -->
+              <!-- <router-link to="/forget-password">{{ $t('login.forgetPwd') }}</router-link> -->
             </div>
 
             <div style="margin-top: 30px">

@@ -117,7 +117,7 @@ axiosInstance.interceptors.response.use(
       }
 
       default:
-        ElMessage.error(`${data.message || '请求错误'} ${EmojiText[500]}`)
+        ElMessage.error(`${data.message || '请求错误'}`)
         return Promise.reject(new Error(data.message || '请求错误'))
     }
   },

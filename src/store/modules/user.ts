@@ -13,20 +13,37 @@ import { MenuListType } from '@/types/menu'
  * 用户状态管理
  * 使用 Pinia Setup 方式定义 Store
  */
+export interface UserState {
+  // 原有状态属性
+  language: LanguageEnum
+  isLogin: boolean
+  rememberPassword: boolean
+  savedPassword: string
+  savedUsername: string
+  info: Partial<UserInfo>
+  searchHistory: MenuListType[]
+  accessToken: string
+  // 新增的锁屏相关属性
+  lockPassword: string
+  isLock: boolean
+}
+
 export const useUserStore = defineStore('userStore', () => {
   // 状态定义
   const language = ref<LanguageEnum>(LanguageEnum.ZH) // 当前语言
   const isLogin = ref(false) // 登录状态
   /*
-    当 rememberPassword 为 true 时，为登录时启用记住密码
-    用户输入的密码会更新到 savedPassword 中
-  */
+        当 rememberPassword 为 true 时，为登录时启用记住密码
+        用户输入的密码会更新到 savedPassword 中
+    */
   const rememberPassword = ref(false) // 是否记住密码
   const savedPassword = ref('') // 已保存的密码
   const savedUsername = ref('') // 已保存的用户名
   const info = ref<Partial<UserInfo>>({}) // 用户信息
   const searchHistory = ref<MenuListType[]>([]) // 搜索历史记录
   const accessToken = ref('') // 访问令牌
+  const lockPassword = ref('') // 新增的锁屏密码状态
+  const isLock = ref(false) // 新增的锁屏状态
 
   // 计算属性
   const getUserInfo = computed(() => info.value) // 获取用户信息
@@ -49,7 +66,9 @@ export const useUserStore = defineStore('userStore', () => {
         searchHistory: history,
         rememberPassword: remberPwd,
         savedPassword: pwd,
-        savedUsername: username
+        savedUsername: username,
+        lockPassword: lockPwd,
+        isLock: lockStatus
       } = sys.user
 
       // 恢复各项状态，使用空值兜底
@@ -60,7 +79,9 @@ export const useUserStore = defineStore('userStore', () => {
       searchHistory.value = history || []
       savedPassword.value = pwd || ''
       savedUsername.value = username || ''
-      accessToken.value = sessionStorage.getItem('accessToken') || ''
+      lockPassword.value = lockPwd || ''
+      isLock.value = lockStatus || false
+      accessToken.value = localStorage.getItem('accessToken') || ''
     }
   }
 
@@ -78,7 +99,9 @@ export const useUserStore = defineStore('userStore', () => {
         savedUsername: savedUsername.value,
         searchHistory: searchHistory.value,
         worktab: getWorktabState.value,
-        setting: getSettingState.value
+        setting: getSettingState.value,
+        lockPassword: lockPassword.value,
+        isLock: isLock.value
       }
     })
   }
@@ -121,15 +144,15 @@ export const useUserStore = defineStore('userStore', () => {
    * @param status 锁屏状态
    */
   function setLockStatus(status: boolean) {
-    rememberPassword.value = status
+    isLock.value = status
   }
 
   /**
    * 设置锁屏密码
    * @param password 锁屏密码
    */
-  function setsavedPassword(password: string) {
-    savedPassword.value = password
+  function setLockPassword(password: string) {
+    lockPassword.value = password
   }
 
   /**
@@ -139,7 +162,7 @@ export const useUserStore = defineStore('userStore', () => {
    */
   function setToken(token: string) {
     accessToken.value = token
-    sessionStorage.setItem('accessToken', token)
+    localStorage.setItem('accessToken', token)
     saveUserData()
   }
 
@@ -153,10 +176,12 @@ export const useUserStore = defineStore('userStore', () => {
       info.value = {}
       isLogin.value = false
       accessToken.value = ''
-      sessionStorage.removeItem('accessToken')
+      localStorage.removeItem('accessToken')
       useWorktabStore().opened = []
+      lockPassword.value = ''
+      isLock.value = false
       saveUserData()
-      sessionStorage.removeItem('iframeRoutes')
+      localStorage.removeItem('iframeRoutes')
       router.push('/login')
     })
   }
@@ -172,6 +197,8 @@ export const useUserStore = defineStore('userStore', () => {
     info,
     searchHistory,
     accessToken,
+    lockPassword,
+    isLock,
     // 计算属性
     getUserInfo,
     getSettingState,
@@ -184,7 +211,7 @@ export const useUserStore = defineStore('userStore', () => {
     setLanguage,
     setSearchHistory,
     setLockStatus,
-    setsavedPassword,
+    setLockPassword,
     setToken,
     logOut
   }
