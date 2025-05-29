@@ -29,7 +29,6 @@
 
     <art-table
       :data="tableData"
-      selection
       :currentPage="currentPage"
       :pageSize="pageSize"
       :total="total"
@@ -45,7 +44,7 @@
           v-if="columns[0].show"
         >
           <div class="user" style="display: flex; align-items: center">
-            <img class="avatar" :src="scope.row.avatar" />
+            <img class="avatar" :src="scope.row.avatar" alt="头像" />
             <div>
               <p class="user-name">{{ scope.row.username }}</p>
               <p>{{ scope.row.realname }}</p>
@@ -91,33 +90,47 @@
           </template>
         </el-table-column>
         <el-table-column label="创建日期" prop="created_at" sortable v-if="columns[5].show" />
+        <el-table-column label="最后更新日期" prop="updated_at" sortable v-if="columns[6].show" />
         <el-table-column fixed="right" label="操作" width="150px">
           <template #default="scope">
-            <button-table type="edit" @click="showDialog('edit', scope.row)" />
-            <button-table type="delete" @click="deleteUser" />
+            <el-dropdown :hide-on-click="false">
+              <template #default>
+                <button-table type="edit" />
+              </template>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="onResetPassword(scope.row)">
+                    重置密码
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="() => openStatusDialog(scope.row)">
+                    调整状态
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <button-table type="delete" @click="deleteUser()" />
           </template>
         </el-table-column>
       </template>
     </art-table>
 
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogType === 'add' ? '添加用户' : '编辑用户'"
-      width="30%"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px">
-        <el-form-item label="账号状态" prop="status">
-          <el-select v-model="formData.status">
-            <el-option label="启用" value="启用" />
-            <el-option label="禁用" value="禁用" />
+    <el-dialog v-model="statusDialogVisible" title="调整用户状态" width="30%">
+      <el-form :model="form">
+        <el-form-item label="用户状态" label-width="80px">
+          <el-select v-model="form.status" placeholder="请选择状态" style="width: 100%">
+            <el-option
+              v-for="item in userStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">提交</el-button>
-        </div>
+        <el-button @click="statusDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitStatusChange">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -126,13 +139,82 @@
 <script setup lang="ts">
   import { FormInstance } from 'element-plus'
   import { ElMessageBox, ElMessage } from 'element-plus'
-  import type { FormRules } from 'element-plus'
   import { UserService } from '@/api/usersApi'
   import { onMounted } from 'vue'
+  import { ref } from 'vue'
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
   const pageSize = ref(5)
   const total = ref(0)
+
+  const statusDialogVisible = ref(false)
+
+  const form = reactive({
+    id: 1,
+    status: 1
+  })
+
+  const userStatusOptions = [
+    { label: '启用', value: 1, tagType: 'info' },
+    { label: '禁用', value: 2, tagType: 'danger' },
+    { label: '审核中', value: 3, tagType: 'warning' }
+  ]
+
+  const buildTagText = (status: number): string => {
+    const match = userStatusOptions.find((option) => option.value === status)
+    return match ? match.label : '未知状态'
+  }
+
+  const getTagType = (status: number): string => {
+    const match = userStatusOptions.find((option) => option.value === status)
+    return match ? match.tagType : 'info'
+  }
+
+  function openStatusDialog(row: any) {
+    form.status = row.status
+    form.id = row.id
+    statusDialogVisible.value = true
+  }
+
+  function submitStatusChange() {
+    statusDialogVisible.value = false
+    UserService.changeStatus({
+      data: JSON.stringify({
+        id: form.id,
+        status: form.status
+      })
+    }).then((res) => {
+      if (res.code === 200) {
+        fetchTableData()
+        ElMessage.success(res.message)
+      } else {
+        ElMessage.error(res.message)
+      }
+    })
+  }
+
+  const onResetPassword = (row: any) => {
+    ElMessageBox.confirm(`确定要为用户名为 ${row.username} 的用户重置密码？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+      .then(() => {
+        handleResetPassword(row.id)
+      })
+      .catch(() => {
+        // 用户点击取消，不做处理
+      })
+  }
+  const handleResetPassword = async (id: string) => {
+    await UserService.resetPassword({ id }).then((res) => {
+      if (res.code === 200) {
+        ElMessage.success(res.message)
+      } else {
+        ElMessage.error(res.message)
+      }
+    })
+  }
 
   // 数据获取逻辑提取成函数
   const fetchTableData = async () => {
@@ -174,13 +256,6 @@
     fetchTableData()
   }
 
-  const dialogType = ref('add')
-  const dialogVisible = ref(false)
-
-  const formData = reactive({
-    status: '启用'
-  })
-
   const sexOptions = [
     {
       value: 0,
@@ -203,6 +278,7 @@
     { name: '角色', show: true },
     { name: '状态', show: true },
     { name: '创建日期', show: true },
+    { name: '最后更新时间', show: true },
     { name: '邮箱', show: true }
   ])
 
@@ -220,22 +296,6 @@
     formEl.resetFields()
   }
 
-  const showDialog = (type: string, row?: any) => {
-    dialogVisible.value = true
-    dialogType.value = type
-    console.log(row)
-
-    // if (type === 'edit' && row) {
-    //   formData.username = row.username
-    //   formData.phone = row.mobile
-    //   formData.sex = row.sex === 1 ? '男' : '女'
-    // } else {
-    //   formData.username = ''
-    //   formData.phone = ''
-    //   formData.sex = '男'
-    // }
-  }
-
   const deleteUser = () => {
     ElMessageBox.confirm('确定要注销该用户吗？', '注销用户', {
       confirmButtonText: '确定',
@@ -248,57 +308,6 @@
 
   const changeColumn = (list: any) => {
     columns.values = list
-  }
-
-  const getTagType = (status: string) => {
-    switch (status) {
-      case '1':
-        return 'success'
-      case '2':
-        return 'info'
-      case '3':
-        return 'warning'
-      case '4':
-        return 'danger'
-      default:
-        return 'info'
-    }
-  }
-
-  const buildTagText = (status: number) => {
-    let text = ''
-
-    if (status === 1) {
-      text = '启用'
-    } else if (status === 0) {
-      text = '禁用'
-    }
-    return text
-  }
-
-  const rules = reactive<FormRules>({
-    username: [
-      { required: true, message: '请输入用户名', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
-    ],
-    phone: [
-      { required: true, message: '请输入手机号', trigger: 'blur' },
-      { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
-    ],
-    sex: [{ required: true, message: '请选择性别', trigger: 'change' }]
-  })
-
-  const formRef = ref<FormInstance>()
-
-  const handleSubmit = async () => {
-    if (!formRef.value) return
-
-    await formRef.value.validate((valid) => {
-      if (valid) {
-        ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
-        dialogVisible.value = false
-      }
-    })
   }
 </script>
 

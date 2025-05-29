@@ -1,6 +1,27 @@
 node_modules
-.DS_Store
 dist
 dist-ssr
 *.local
 .cursorrules
+
+# 可选：如果你使用 IDE（比如 Goland）
+.idea
+.vscode
+
+# OS 缓存
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.log
+*.tmp
+*.swp
+
+# node 相关
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Husky 自动生成的 hook 安装内容（可选）
+.husky/_/
+

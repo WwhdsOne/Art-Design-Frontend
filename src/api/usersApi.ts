@@ -36,7 +36,6 @@ export class UserService {
 
   // 获取用户分页 - 直接接收 JSON 字符串
   static getUserPage(options: { data: string }): Promise<PaginationResult<any>> {
-    // ✅ 直接使用 options.data 字符串
     return request.post({
       url: '/api/user/page',
       data: options.data
@@ -45,7 +44,6 @@ export class UserService {
 
   // 更新用户 - 直接接收 JSON 字符串
   static updateUser(options: { data: string }): Promise<BaseResult> {
-    // ✅ 直接使用 options.data 字符串
     return request.post({
       url: '/api/user/update',
       data: options.data
@@ -56,7 +54,7 @@ export class UserService {
   static updatePassword(options: { data: string }): Promise<BaseResult> {
     // ✅ 直接使用 options.data 字符串
     return request.post({
-      url: '/api/user/updatePassword',
+      url: '/api/user/changePassword',
       data: options.data
     })
   }
@@ -67,6 +65,21 @@ export class UserService {
     return request.post({
       url: '/api/user/uploadAvatar',
       data: formData
+    })
+  }
+
+  // 重置为初始密码（使用路径参数）
+  static resetPassword(options: { id: string }): Promise<BaseResult> {
+    return request.post({
+      url: `/api/user/resetPassword/${options.id}`
+    })
+  }
+
+  // 调整用户状态
+  static changeStatus(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: `/api/user/changeStatus`,
+      data: options.data
     })
   }
 }
