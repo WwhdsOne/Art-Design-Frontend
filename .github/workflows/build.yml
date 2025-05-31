@@ -12,47 +12,48 @@ jobs:
       IMAGE_NAME: art-design-frontend
       CONTAINER_NAME: art-design-frontend
       SERVER_IP: ${{ secrets.SERVER_IP }}
-      SSH_USER:  ${{ secrets.SSH_USER }}
+      SSH_USER: ${{ secrets.SSH_USER }}
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
       SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
     steps:
-      # 拉取代码
+      # 1. 拉取代码
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # ✅ 推荐使用 Node 20（LTS），更稳定
+      # 2. 设置 Node.js 环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
 
-      # ✅ 正确安装 pnpm 并添加到 PATH
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8 # 或 10.8.0，保持一致即可
-          run_install: false  # ❗不要让它自动安装依赖
+      # 3. 安装 pnpm (关键修复点)
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          echo "PNPM version: $(pnpm --version)"
 
+      # 4. 安装依赖
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 5. 构建项目
       - name: Build Vue Application
         run: pnpm run build
 
-
-      # 清理旧容器和镜像
+      # 6. 清理旧容器和镜像
       - name: Cleanup existing Docker container and image
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ env.SERVER_IP }}
+          username: ${{ env.SSH_USER }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SERVER_PORT }}
           script: |
             echo "🔍 Checking and cleaning existing Docker container and image..."
 
-            # ========= 1. 移除旧容器 ==========
+            # 1. 移除旧容器
             CONTAINER_ID=$(docker ps -a -q --filter "name=^/${{ env.CONTAINER_NAME }}$")
 
             if [ -n "$CONTAINER_ID" ]; then
@@ -63,7 +64,7 @@ jobs:
               echo "ℹ️ No container named ${{ env.CONTAINER_NAME }} found."
             fi
 
-            # ========= 2. 移除旧镜像 ==========
+            # 2. 移除旧镜像
             IMAGE_ID=$(docker images -q ${{ env.IMAGE_NAME }}:latest)
 
             if [ -n "$IMAGE_ID" ]; then
@@ -74,25 +75,25 @@ jobs:
               echo "ℹ️ No image named ${{ env.IMAGE_NAME }}:latest found."
             fi
 
-      # 上传构建产物和 Dockerfile 到服务器
+      # 7. 上传构建产物
       - name: Upload artifact to server
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ env.SERVER_IP }}
+          username: ${{ env.SSH_USER }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SERVER_PORT }}
           source: "dist,Dockerfile,nginx.conf"
           target: "/home/docker-images/${{ env.IMAGE_NAME }}"
 
-      # 构建镜像并运行容器
+      # 8. 构建并运行容器
       - name: Build Docker image and run container
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ env.SERVER_IP }}
+          username: ${{ env.SSH_USER }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SERVER_PORT }}
           script: |
             cd /home/docker-images/${{ env.IMAGE_NAME }}
 
@@ -106,4 +107,6 @@ jobs:
               -e SSL_CERT_PATH=/app/certs/fullchain.pem \
               -e SSL_KEY_PATH=/app/certs/privkey.pem \
               --restart unless-stopped \
+              -p 80:80 \
+              -p 443:443 \
               ${{ env.IMAGE_NAME }}:latest
