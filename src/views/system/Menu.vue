@@ -12,6 +12,45 @@
           </template>
         </el-table-column>
         <el-table-column prop="path" label="路由" />
+        <el-table-column label="权限" width="180">
+          <template #default="scope">
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                  <component
+                    v-for="(item, index) in scope.row.meta.authList"
+                    :key="item.id || index"
+                    :is="ElPopover"
+                    placement="top-start"
+                    trigger="click"
+                  >
+                    <template #default>
+                      <div
+                        style="
+                          display: flex;
+                          gap: 4px;
+                          justify-content: flex-end;
+                          margin: 0;
+                          text-align: right;
+                        "
+                      >
+                        <el-button size="small" type="primary" @click="showModel('button', item)"
+                          >编辑</el-button
+                        >
+                        <el-button size="small" type="danger" @click="deleteMenu(item)"
+                          >删除</el-button
+                        >
+                      </div>
+                    </template>
+                    <template #reference>
+                      <el-button class="small-btn">{{ item.name }}</el-button>
+                    </template>
+                  </component>
+                </div>
+              </el-col>
+            </el-row>
+          </template>
+        </el-table-column>
         <el-table-column label="编辑时间" prop="date">
           <template #default="scope">
             <span v-if="scope.row.update_at">{{ scope.row.update_at }}</span>
@@ -21,7 +60,7 @@
           <template #default="scope">
             <button-table type="add" v-auth="'add'" @click="showModel('menu')" />
             <button-table type="edit" v-auth="'edit'" @click="showDialog('edit', scope.row)" />
-            <button-table type="delete" v-auth="'delete'" @click="deleteMenu" />
+            <button-table type="delete" v-auth="'delete'" @click="deleteMenu(scope.row)" />
           </template>
         </el-table-column>
       </template>
@@ -39,70 +78,91 @@
         <template v-if="labelPosition === 'menu'">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="菜单名称" prop="name">
-                <el-input v-model="form.name" placeholder="菜单名称"></el-input>
+              <el-form-item label="组件名称" prop="name">
+                <el-input v-model="form.name" placeholder="组件名称" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="组件路径" prop="component">
+                <el-input v-model="form.component" placeholder="组件路径" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="菜单名称" prop="title">
+                <el-input v-model="form.meta.title" placeholder="菜单名称" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="路由地址" prop="path">
-                <el-input v-model="form.path" placeholder="路由地址"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="权限标识" prop="label">
-                <el-input v-model="form.label" placeholder="权限标识"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="图标" prop="icon">
-                <icon-selector :iconType="iconType" :defaultIcon="form.icon" width="229px" />
+                <el-input v-model="form.path" placeholder="路由地址" />
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="菜单排序" prop="sort" style="width: 100%">
-                <el-input-number
-                  v-model="form.sort"
-                  style="width: 100%"
-                  @change="handleChange"
-                  :min="1"
-                  controls-position="right"
-                />
+              <el-form-item label="图标" prop="icon">
+                <icon-selector :iconType="iconType" :defaultIcon="form.meta.icon" width="229px" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="菜单排序" prop="sort">
+                <el-input-number v-model="form.sort" :min="1" style="width: 100%" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="外部链接" prop="link">
-                <el-input
-                  v-model="form.link"
-                  placeholder="外部链接/内嵌地址(https://www.baidu.com)"
-                ></el-input>
+                <el-input v-model="form.meta.link" placeholder="https://..." />
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row :gutter="20">
-            <el-col :span="5">
-              <el-form-item label="是否启用" prop="isEnable">
-                <el-switch v-model="form.isEnable"></el-switch>
+            <el-col :span="6">
+              <el-form-item label="是否显示" prop="isHide">
+                <el-switch v-model="form.meta.isHide" />
               </el-form-item>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="6">
+              <el-form-item label="标签页隐藏" prop="isHideTab">
+                <el-switch v-model="form.meta.isHideTab" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
               <el-form-item label="页面缓存" prop="keepAlive">
-                <el-switch v-model="form.keepAlive"></el-switch>
+                <el-switch v-model="form.meta.keepAlive" />
               </el-form-item>
             </el-col>
-            <el-col :span="5">
-              <el-form-item label="是否显示" prop="isHidden">
-                <el-switch v-model="form.isHidden"></el-switch>
+            <el-col :span="6">
+              <el-form-item label="是否内嵌" prop="isIframe">
+                <el-switch v-model="form.meta.isIframe" />
               </el-form-item>
             </el-col>
-            <el-col :span="5">
-              <el-form-item label="是否内嵌" prop="isMenu">
-                <el-switch v-model="form.isIframe"></el-switch>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="文本徽标" prop="showTextBadge">
+                <el-input v-model="form.meta.showTextBadge" placeholder="文本徽标内容" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="显示徽标" prop="showBadge">
+                <el-switch v-model="form.meta.showBadge" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="主容器显示" prop="isInMainContainer">
+                <el-switch v-model="form.meta.isInMainContainer" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -149,51 +209,95 @@
 
 <script setup lang="ts">
   import { useMenuStore } from '@/store/modules/menu'
-  import type { FormInstance, FormRules } from 'element-plus'
-  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { ElMessage, ElMessageBox, ElPopover, FormInstance, FormRules } from 'element-plus'
   import { IconTypeEnum } from '@/enums/appEnum'
   import { formatMenuTitle } from '@/utils/menu'
+  import { menuService } from '@/api/menuApi'
+  import { onMounted } from 'vue'
+  import { ref } from 'vue'
 
-  const menuList = computed(() => useMenuStore().getMenuList)
+  const tableData = ref<any[]>([])
+  onMounted(async () => {
+    await fetchTableData()
+  })
 
+  const fetchTableData = async () => {
+    // ✅ 注意这里加了括号和 await
+    tableData.value = computed(() => useMenuStore().getMenuList).value
+  }
   const dialogVisible = ref(false)
   const form = reactive({
-    // 菜单
     name: '',
+    component: '',
     path: '',
-    label: '',
-    icon: '',
-    isEnable: true,
     sort: 1,
-    isMenu: true,
-    keepAlive: true,
-    isHidden: true,
-    link: '',
-    isIframe: false,
+    parentID: '', // 如果需要
+    meta: {
+      title: '',
+      icon: '',
+      showBadge: false,
+      showTextBadge: '',
+      isHide: false,
+      isHideTab: false,
+      link: '',
+      isIframe: false,
+      keepAlive: false,
+      authCode: '',
+      isInMainContainer: false
+    },
     // 权限 (修改这部分)
     authName: '',
     authLabel: '',
     authIcon: '',
-    authSort: 1,
-    update_at: ''
+    authSort: 1
   })
+
+  const resetForm = () => {
+    formRef.value?.resetFields()
+    Object.assign(form, {
+      name: '',
+      component: '',
+      path: '',
+      sort: 1,
+      parentID: '', // 如果需要
+      meta: {
+        title: '',
+        icon: '',
+        showBadge: false,
+        showTextBadge: '',
+        isHide: false,
+        isHideTab: false,
+        link: '',
+        isIframe: false,
+        keepAlive: false,
+        isInMainContainer: false
+      },
+      // 权限 (修改这部分)
+      authName: '',
+      authLabel: '',
+      authIcon: '',
+      authSort: 1
+    })
+  }
   const iconType = ref(IconTypeEnum.UNICODE)
 
   const labelPosition = ref('menu')
   const rules = reactive<FormRules>({
     name: [
-      { required: true, message: '请输入菜单名称', trigger: 'blur' },
+      { required: true, message: '请输入组件名称', trigger: 'blur' },
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
     path: [{ required: true, message: '请输入路由地址', trigger: 'blur' }],
-    label: [{ required: true, message: '输入权限标识', trigger: 'blur' }],
+    icon: [{ required: true, message: '请选择图标', trigger: 'blur' }],
+    title: [
+      { required: true, message: '请输入菜单名称', trigger: 'blur' },
+      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+    ],
+    component: [{ required: true, message: '请输入组件路径', trigger: 'blur' }],
     // 修改这部分
     authName: [{ required: true, message: '请输入权限名称', trigger: 'blur' }],
     authLabel: [{ required: true, message: '请输入权限权限标识', trigger: 'blur' }]
   })
-
-  const tableData = menuList.value
-
   const isEdit = ref(false)
   const formRef = ref<FormInstance>()
   const dialogTitle = computed(() => {
@@ -205,7 +309,9 @@
     showModel('menu', row, true)
   }
 
-  const handleChange = () => {}
+  const handleChange = () => {
+    fetchTableData()
+  }
 
   const submitForm = async () => {
     if (!formRef.value) return
@@ -213,22 +319,21 @@
     await formRef.value.validate(async (valid) => {
       if (valid) {
         try {
-          // const menuStore = useMenuStore()
           // const params =
           //   labelPosition.value === 'menu'
           //     ? {
-          //         title: form.name,
+          //         title: form.title,
           //         path: form.path,
-          //         name: form.label,
+          //         name: form.name,
           //         icon: form.icon,
           //         sort: form.sort,
-          //         isEnable: form.isEnable,
-          //         isMenu: form.isMenu,
+          //         parentID: form.parentID,
           //         keepAlive: form.keepAlive,
-          //         isHidden: form.isHidden,
+          //         isHide: form.isHide,
           //         link: form.link
           //       }
           //     : {
+          //         parentID: form.parentID,
           //         title: form.authName,
           //         name: form.authLabel,
           //         icon: form.authIcon,
@@ -268,15 +373,12 @@
           // console.log(row.meta)
           form.name = formatMenuTitle(row.meta.title)
           form.path = row.path
-          form.label = row.name
-          form.icon = row.meta.icon
+          form.meta.icon = row.meta.icon
           form.sort = row.meta.sort || 1
-          form.isMenu = row.meta.isMenu
-          form.keepAlive = row.meta.keepAlive
-          form.isHidden = row.meta.isHidden || true
-          form.isEnable = row.meta.isEnable || true
-          form.link = row.meta.link
-          form.isIframe = row.meta.isIframe || false
+          form.meta.keepAlive = row.meta.keepAlive
+          form.meta.isHide = row.meta.isHide || true
+          form.meta.link = row.meta.link
+          form.meta.isIframe = row.meta.isIframe || false
         } else {
           // 权限按钮数据回显
           form.authName = row.title
@@ -288,59 +390,35 @@
     }
   }
 
-  const resetForm = () => {
-    formRef.value?.resetFields()
-    Object.assign(form, {
-      // 菜单
-      name: '',
-      path: '',
-      label: '',
-      icon: '',
-      sort: 1,
-      isMenu: true,
-      keepAlive: true,
-      isHidden: true,
-      link: '',
-      isIframe: false,
-      // 权限
-      authName: '',
-      authLabel: '',
-      authIcon: '',
-      authSort: 1
-    })
-  }
-
-  const deleteMenu = async () => {
+  const deleteMenu = async (row: any) => {
     try {
-      await ElMessageBox.confirm('确定要删除该菜单吗？删除后无法恢复', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      // 只有权限的code字段不为空
+      if (!row.code || row.code === '') {
+        await ElMessageBox.confirm('确定要删除该权限吗？删除后无法恢复', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      } else {
+        await ElMessageBox.confirm('确定要删除该菜单吗？删除后无法恢复', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      }
+      await menuService.deleteMenu(row.id).then((res) => {
+        if (res.code === 200) {
+          ElMessage.success('删除成功')
+        } else {
+          ElMessage.error('删除失败')
+        }
       })
-
-      ElMessage.success('删除成功')
     } catch (error) {
       if (error !== 'cancel') {
         ElMessage.error('删除失败')
       }
     }
   }
-
-  // const deleteAuth = async () => {
-  //   try {
-  //     await ElMessageBox.confirm('确定要删除该权限吗？删除后无法恢复', '提示', {
-  //       confirmButtonText: '确定',
-  //       cancelButtonText: '取消',
-  //       type: 'warning'
-  //     })
-
-  //     ElMessage.success('删除成功')
-  //   } catch (error) {
-  //     if (error !== 'cancel') {
-  //       ElMessage.error('删除失败')
-  //     }
-  //   }
-  // }
 
   // 修改计算属性，增加锁定控制参数
   const disableMenuType = computed(() => {
@@ -349,8 +427,7 @@
     // 编辑菜单时锁定为菜单类型
     if (isEdit.value && labelPosition.value === 'menu') return true
     // 顶部添加菜单按钮时锁定为菜单类型
-    if (!isEdit.value && labelPosition.value === 'menu' && lockMenuType.value) return true
-    return false
+    return !!(!isEdit.value && labelPosition.value === 'menu' && lockMenuType.value)
   })
 
   // 添加一个控制变量

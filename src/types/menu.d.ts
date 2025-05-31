@@ -1,5 +1,5 @@
 export type MenuListType = {
-  id: number
+  id: string
   path: string // 路由
   name: string // 组件名
   component?: string // 改为字符串类型，表示组件路径
@@ -20,7 +20,7 @@ export type MenuListType = {
 }
 
 export type AuthMark = {
-  id: number // 权限ID
+  id: string // 权限ID
   name: string // 权限名称
   code: string // 权限标识
 }

@@ -41,4 +41,10 @@ export class menuService {
         throw error
       })
   }
+
+  static deleteMenu(id: string): Promise<BaseResult> {
+    return request.post({
+      url: `/api/menu/delete/${id}`
+    })
+  }
 }
