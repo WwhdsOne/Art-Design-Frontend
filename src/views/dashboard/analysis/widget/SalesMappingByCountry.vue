@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { onMounted, onUnmounted, ref } from 'vue'
   import { useECharts } from '@/utils/echarts/useECharts'
   import type { EChartsOption } from 'echarts'
   import { useSettingStore } from '@/store/modules/setting'

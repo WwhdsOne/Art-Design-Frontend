@@ -96,13 +96,13 @@
 
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/Form/ButtonMore.vue'
-  import { ElMessage, ElMessageBox } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
-  import { ElTree } from 'element-plus'
+  import { ElMessage, ElMessageBox, ElTree } from 'element-plus'
 
   import { onMounted } from 'vue'
   import { RoleService } from '@/api/roleApi'
   import { RoleInfo } from '@/types/store'
+
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
   const pageSize = ref(5)

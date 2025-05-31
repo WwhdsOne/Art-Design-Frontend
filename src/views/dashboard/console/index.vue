@@ -54,6 +54,7 @@
   import { useSettingStore } from '@/store/modules/setting'
   import { WEB_LINKS } from '@/utils/links'
   import { useCommon } from '@/composables/useCommon'
+
   const settingStore = useSettingStore()
   const currentGlopTheme = computed(() => settingStore.systemThemeType)
 

@@ -37,7 +37,8 @@
 <script setup lang="ts">
   //
 
-  import { ref, reactive, toRefs, onMounted, computed } from 'vue'
+  import { computed, onMounted, reactive, ref, toRefs } from 'vue'
+
   const emit = defineEmits(['handlerMove', 'update:value', 'passCallback'])
   interface PropsType {
     value: boolean

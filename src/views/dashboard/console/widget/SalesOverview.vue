@@ -11,13 +11,12 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
   import echarts from '@/plugins/echarts'
   import { useECharts } from '@/utils/echarts/useECharts'
-  import { hexToRgba } from '@/utils/colors'
+  import { getCssVariable, hexToRgba } from '@/utils/colors'
   import { useSettingStore } from '@/store/modules/setting'
   import { SystemThemeEnum } from '@/enums/appEnum'
-  import { getCssVariable } from '@/utils/colors'
 
   const chartRef = ref<HTMLDivElement>()
   const { setOptions, removeResize, resize } = useECharts(chartRef as Ref<HTMLDivElement>)

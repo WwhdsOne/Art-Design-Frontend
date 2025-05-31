@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
   import ImgCutter from 'vue-img-cutter'
-  import { ref, watch, onMounted, computed } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
 
   interface CutterProps {
     // 基础配置

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+  import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import * as echarts from 'echarts'
   import { useSettingStore } from '@/store/modules/setting'
   import { SystemThemeEnum } from '@/enums/appEnum'

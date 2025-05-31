@@ -37,9 +37,9 @@
 </template>
 
 <script setup lang="ts">
-  import { hexToRgb } from '@/utils/color'
   import { computed } from 'vue'
   import { useI18n } from 'vue-i18n'
+
   const { t } = useI18n()
 
   // 使用 computed 来创建响应式的产品数据

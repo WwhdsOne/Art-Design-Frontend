@@ -44,8 +44,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
   import type { CSSProperties } from 'vue'
+  import { computed, ref } from 'vue'
 
   export interface MenuItemType {
     key: string

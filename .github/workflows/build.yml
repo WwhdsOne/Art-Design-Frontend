@@ -1,0 +1,103 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: art-design-frontend
+      CONTAINER_NAME: art-design-frontend
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SSH_USER:  ${{ secrets.SSH_USER }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+    steps:
+      # 拉取代码
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      # 安装 Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'  # 也可以换成你项目需要的版本
+          cache: 'npm'
+
+      # 安装依赖
+      - name: Install dependencies
+        run: npm ci
+
+      # 构建项目
+      - name: Build Vue Application
+        run: npm run build
+
+      # 清理旧容器和镜像
+      - name: Cleanup existing Docker container and image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            echo "🔍 Checking and cleaning existing Docker container and image..."
+
+            # ========= 1. 移除旧容器 ==========
+            CONTAINER_ID=$(docker ps -a -q --filter "name=^/${{ env.CONTAINER_NAME }}$")
+
+            if [ -n "$CONTAINER_ID" ]; then
+              echo "🛑 Removing container: ${{ env.CONTAINER_NAME }} ($CONTAINER_ID)"
+              docker rm -f "$CONTAINER_ID" || true
+              echo "✅ Container removed."
+            else
+              echo "ℹ️ No container named ${{ env.CONTAINER_NAME }} found."
+            fi
+
+            # ========= 2. 移除旧镜像 ==========
+            IMAGE_ID=$(docker images -q ${{ env.IMAGE_NAME }}:latest)
+
+            if [ -n "$IMAGE_ID" ]; then
+              echo "🧹 Removing image: ${{ env.IMAGE_NAME }}:latest ($IMAGE_ID)"
+              docker rmi -f "$IMAGE_ID" || true
+              echo "✅ Image removed."
+            else
+              echo "ℹ️ No image named ${{ env.IMAGE_NAME }}:latest found."
+            fi
+
+      # 上传构建产物和 Dockerfile 到服务器
+      - name: Upload artifact to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: "dist,Dockerfile,nginx.conf"
+          target: "/home/docker-images/${{ env.IMAGE_NAME }}"
+
+      # 构建镜像并运行容器
+      - name: Build Docker image and run container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /home/docker-images/${{ env.IMAGE_NAME }}
+
+            docker build -t ${{ env.IMAGE_NAME }}:latest .
+
+            docker run -d \
+              --network docker-compose_app-net \
+              --name ${{ env.CONTAINER_NAME }} \
+              -v /etc/letsencrypt/live/www.soyorinlove.cn/fullchain.pem:/app/certs/fullchain.pem \
+              -v /etc/letsencrypt/live/www.soyorinlove.cn/privkey.pem:/app/certs/privkey.pem \
+              -e SSL_CERT_PATH=/app/certs/fullchain.pem \
+              -e SSL_KEY_PATH=/app/certs/privkey.pem \
+              --restart unless-stopped \
+              ${{ env.IMAGE_NAME }}:latest

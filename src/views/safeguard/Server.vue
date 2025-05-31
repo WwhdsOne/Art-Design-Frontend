@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, onMounted, onUnmounted } from 'vue'
+  import { onMounted, onUnmounted, reactive } from 'vue'
 
   interface ServerInfo {
     name: string

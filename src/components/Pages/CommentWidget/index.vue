@@ -26,7 +26,8 @@
 <script setup lang="ts">
   import { ref } from 'vue'
   import CommentItem from './CommentItem.vue'
-  import { commentList, Comment } from '@/mock/temp/commentDetail'
+  import { Comment, commentList } from '@/mock/temp/commentDetail'
+
   const comments = commentList
 
   const newComment = ref<Partial<Comment>>({

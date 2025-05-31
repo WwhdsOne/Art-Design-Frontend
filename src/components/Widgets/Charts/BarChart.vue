@@ -3,10 +3,10 @@
 </template>
 
 <script setup lang="ts">
-  import { useChartOps, useChart } from '@/composables/useChart'
+  import { useChart, useChartOps } from '@/composables/useChart'
   import { getCssVariable } from '@/utils/colors'
-  import { EChartsOption } from 'echarts'
   import * as echarts from 'echarts'
+  import { EChartsOption } from 'echarts'
 
   const {
     chartRef,

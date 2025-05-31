@@ -69,7 +69,7 @@
   import { computed, onMounted, ref, watch } from 'vue'
   import { LocationQueryRaw, useRoute, useRouter } from 'vue-router'
   import { useI18n } from 'vue-i18n'
-  import { ArrowDown, ArrowLeft, ArrowRight, Close, CircleClose } from '@element-plus/icons-vue'
+  import { ArrowDown, ArrowLeft, ArrowRight, CircleClose, Close } from '@element-plus/icons-vue'
 
   import { useWorktabStore } from '@/store/modules/worktab'
   import { useUserStore } from '@/store/modules/user'
@@ -78,6 +78,7 @@
   import type { MenuItemType } from '@/components/Widgets/MenuRight.vue'
   import { WorkTabType } from '@/types/store'
   import { useSettingStore } from '@/store/modules/setting'
+
   const { t } = useI18n()
   const store = useWorktabStore()
   const userStore = useUserStore()

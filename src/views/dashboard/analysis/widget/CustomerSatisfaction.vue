@@ -10,11 +10,12 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useECharts } from '@/utils/echarts/useECharts'
   import * as echarts from 'echarts'
   import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
+
   const { t } = useI18n()
 
   const store = useSettingStore()

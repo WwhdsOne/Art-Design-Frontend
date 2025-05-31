@@ -27,6 +27,7 @@
 <script setup lang="ts">
   import { useChart, useChartOps } from '@/composables/useChart'
   import { EChartsOption } from 'echarts'
+
   const { chartRef, isDark, initChart } = useChart()
 
   interface Props {

@@ -79,8 +79,8 @@
   import LeftView from '@/components/Pages/Login/LeftView.vue'
   import AppConfig from '@/config'
   import { UserService } from '@/api/usersApi'
-  import { ElMessage } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
+  import { ElMessage } from 'element-plus'
   import { ApiStatus } from '@/utils/http/status'
 
   const router = useRouter()

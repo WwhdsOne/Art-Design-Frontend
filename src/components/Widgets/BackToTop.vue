@@ -19,6 +19,7 @@
   import { useCommon } from '@/composables/useCommon'
   import EmojiText from '@/utils/emojo'
   import { ref, watch } from 'vue'
+
   const { scrollToTop } = useCommon()
 
   const { y } = useWindowScroll()

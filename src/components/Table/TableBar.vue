@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
   import { useCommon } from '@/composables/useCommon'
-  import { Search, RefreshRight, Operation } from '@element-plus/icons-vue'
+  import { Operation, RefreshRight, Search } from '@element-plus/icons-vue'
 
   const emit = defineEmits(['search', 'reset', 'changeColumn'])
 

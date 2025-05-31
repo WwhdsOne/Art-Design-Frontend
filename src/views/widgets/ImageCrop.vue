@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
   import lockImg from '@imgs/lock/lock_screen_1.png'
+
   const imageUrl = ref(lockImg)
 
   const handleError = (error: any) => {

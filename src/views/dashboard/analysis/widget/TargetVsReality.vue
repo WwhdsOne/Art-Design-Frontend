@@ -32,10 +32,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { onMounted, onUnmounted, ref } from 'vue'
   import { useECharts } from '@/utils/echarts/useECharts'
   import { useSettingStore } from '@/store/modules/setting'
   import { useI18n } from 'vue-i18n'
+
   const { t } = useI18n()
 
   const chartRef = ref<HTMLDivElement>()

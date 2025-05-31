@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, onMounted } from 'vue'
+  import { onMounted, reactive } from 'vue'
 
   // 导入产品图片
   import product1 from '@/assets/img/3d/icon1.png'

@@ -137,11 +137,10 @@
 </template>
 
 <script setup lang="ts">
-  import { FormInstance } from 'element-plus'
-  import { ElMessageBox, ElMessage } from 'element-plus'
+  import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
   import { UserService } from '@/api/usersApi'
-  import { onMounted } from 'vue'
-  import { ref } from 'vue'
+  import { onMounted, ref } from 'vue'
+
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
   const pageSize = ref(5)
@@ -154,8 +153,10 @@
     status: 1
   })
 
-  const userStatusOptions = [
-    { label: '启用', value: 1, tagType: 'info' },
+  type TagType = 'info' | 'primary' | 'success' | 'warning' | 'danger'
+
+  const userStatusOptions: { label: string; value: number; tagType: TagType }[] = [
+    { label: '启用', value: 1, tagType: 'primary' },
     { label: '禁用', value: 2, tagType: 'danger' },
     { label: '审核中', value: 3, tagType: 'warning' }
   ]
@@ -165,9 +166,9 @@
     return match ? match.label : '未知状态'
   }
 
-  const getTagType = (status: number): string => {
+  const getTagType = (status: number): TagType => {
     const match = userStatusOptions.find((option) => option.value === status)
-    return match ? match.tagType : 'info'
+    return match?.tagType ?? 'info'
   }
 
   function openStatusDialog(row: any) {

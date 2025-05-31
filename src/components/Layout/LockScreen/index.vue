@@ -71,11 +71,12 @@
 <script setup lang="ts">
   import { Lock, Unlock } from '@element-plus/icons-vue'
   import type { FormInstance, FormRules } from 'element-plus'
+  import { ElMessage } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
   import CryptoJS from 'crypto-js'
-  import { ElMessage } from 'element-plus'
   import mittBus from '@/utils/mittBus'
   import { useI18n } from 'vue-i18n'
+
   const { t } = useI18n()
 
   const ENCRYPT_KEY = import.meta.env.VITE_LOCK_ENCRYPT_KEY

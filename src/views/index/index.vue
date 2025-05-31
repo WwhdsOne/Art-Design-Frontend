@@ -58,12 +58,12 @@
 
 <script setup lang="ts">
   import '@/assets/styles/transition.scss'
-  import { computed, ref, watch, nextTick } from 'vue'
+  import { computed, nextTick, ref, watch } from 'vue'
   import MenuLeft from '@comps/Layout/MenuLeft/index.vue'
   import TopBar from '@comps/Layout/TopBar/index.vue'
   import WorkTab from '@comps/Layout/WorkTab/index.vue'
   import Setting from '@comps/Layout/Setting/index.vue'
-  import { MenuWidth, MenuTypeEnum } from '@/enums/appEnum'
+  import { MenuTypeEnum, MenuWidth } from '@/enums/appEnum'
   import { useMenuStore } from '@/store/modules/menu'
   import { useSettingStore } from '@/store/modules/setting'
   import { useWorktabStore } from '@/store/modules/worktab'

@@ -3,10 +3,13 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { onMounted, onUnmounted, ref } from 'vue'
   import { useEventListener } from '@vueuse/core'
   import mittBus from '@/utils/mittBus'
   import type { Handler } from 'mitt'
+  import bp from '@imgs/ceremony/hb.png'
+  import sd from '@imgs/ceremony/sd.png'
+  import yd from '@imgs/ceremony/yd.png'
 
   // 对象池大小
   const POOL_SIZE = 600
@@ -350,10 +353,6 @@
       canvas.value.height = window.innerHeight
     }
   }
-
-  import bp from '@imgs/ceremony/hb.png'
-  import sd from '@imgs/ceremony/sd.png'
-  import yd from '@imgs/ceremony/yd.png'
 
   // 预加载所有需要的图片
   const preloadAllImages = async () => {

@@ -1,13 +1,13 @@
 <template>
   <el-config-provider :size="elSize" :locale="locales[language]" :z-index="3000">
-    <div style=" display: flex; flex-direction: column;min-height: 100vh">
+    <div style="display: flex; flex-direction: column; min-height: 100vh">
       <!-- 主体内容 -->
       <div style="flex: 1">
         <router-view></router-view>
       </div>
 
       <!-- 备案信息 -->
-      <div style=" padding: 10px 0; color: #5c6b77;text-align: center; background-color: #e9eef3">
+      <div style="padding: 10px 0; color: #5c6b77; text-align: center; background-color: #e9eef3">
         <a target="_blank" style="color: #5c6b77" href="https://beian.miit.gov.cn/">
           {{ record }}
         </a>
@@ -25,6 +25,7 @@
   import { initState, saveUserData } from './utils/storage'
   import { UserService } from './api/usersApi'
   import { ApiStatus } from './utils/http/status'
+
   let year = new Date().getFullYear() // 一般都是最新的一年
   let author = 'Wwhds' // 作者名
   let record = '京ICP备2025120689号-1' // 备案号

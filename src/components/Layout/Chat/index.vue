@@ -64,8 +64,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { Picture, Paperclip } from '@element-plus/icons-vue'
+  import { onMounted, ref } from 'vue'
+  import { Paperclip, Picture } from '@element-plus/icons-vue'
   import mittBus from '@/utils/mittBus'
   import meAvatar from '@/assets/img/avatar/avatar5.jpg'
   import aiAvatar from '@/assets/img/avatar/avatar10.jpg'

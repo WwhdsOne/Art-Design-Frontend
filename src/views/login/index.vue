@@ -124,6 +124,7 @@
   // 切换主题
   import { useTheme } from '@/composables/useTheme'
   import { UserService } from '@/api/usersApi'
+  import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage, ElNotification } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
   import { HOME_PAGE } from '@/router'
@@ -132,10 +133,9 @@
   import { languageOptions } from '@/language'
   import { LanguageEnum, SystemThemeEnum } from '@/enums/appEnum'
   import { useI18n } from 'vue-i18n'
+  import { useSettingStore } from '@/store/modules/setting'
 
   const { t } = useI18n()
-  import { useSettingStore } from '@/store/modules/setting'
-  import type { FormInstance, FormRules } from 'element-plus'
 
   const userStore = useUserStore()
   const router = useRouter()

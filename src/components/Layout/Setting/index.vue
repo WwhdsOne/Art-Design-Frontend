@@ -246,11 +246,12 @@
 <script setup lang="ts">
   import { useSettingStore } from '@/store/modules/setting'
   import AppConfig from '@/config'
-  import { SystemThemeEnum, MenuThemeEnum, MenuTypeEnum } from '@/enums/appEnum'
+  import { ContainerWidthEnum, MenuThemeEnum, MenuTypeEnum, SystemThemeEnum } from '@/enums/appEnum'
   import mittBus from '@/utils/mittBus'
   import { useTheme } from '@/composables/useTheme'
   import { useCeremony } from '@/composables/useCeremony'
-  import { ContainerWidthEnum } from '@/enums/appEnum'
+  import { useI18n } from 'vue-i18n'
+
   const { openFestival, cleanup } = useCeremony()
   const { setSystemTheme, setSystemAutoTheme, switchThemeStyles } = useTheme()
 
@@ -315,7 +316,6 @@
   const showNprogress = ref(true)
   const colorWeak = ref(false)
   const containerWidth = computed(() => store.containerWidth)
-  import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
 
   const tabStyleOps = computed(() => [
@@ -597,7 +597,7 @@
 
     .el-drawer {
       // 背景滤镜
-      background: rgba($color: #fff, $alpha: 50%) !important;
+      background: rgba(#fff, 0.5) !important;
       box-shadow: 0 0 30px rgb(0 0 0 / 10%) !important;
 
       @include backdropBlur();
@@ -607,7 +607,7 @@
   .dark {
     .setting-modal {
       .el-drawer {
-        background: rgba($color: #000, $alpha: 50%) !important;
+        background: rgba(#000, 0.5) !important;
       }
     }
   }

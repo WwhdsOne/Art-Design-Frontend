@@ -44,9 +44,9 @@
 <script setup lang="ts">
   import { MnistService } from '@/api/mnistApi'
   import { MnistImageData } from '@/api/model/mnistModel'
+  import type { UploadProps } from 'element-plus'
   import { ElMessage } from 'element-plus'
   import type { UploadRequestOptions } from 'element-plus/es/components/upload/src/upload.d'
-  import type { UploadProps } from 'element-plus'
 
   import dayjs from 'dayjs'
 

@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
   import { getIframeRoutes } from '@/utils/menu'
-  import { ref, onMounted } from 'vue'
+  import { onMounted, ref } from 'vue'
 
   const route = useRoute()
 

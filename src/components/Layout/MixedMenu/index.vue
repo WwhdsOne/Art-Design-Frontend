@@ -34,11 +34,12 @@
 <script setup lang="ts">
   import { useSettingStore } from '@/store/modules/setting'
   import { MenuListType } from '@/types/menu'
-  const route = useRoute()
-  import { ref, onMounted } from 'vue'
+  import { onMounted, ref } from 'vue'
   import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
   import { formatMenuTitle } from '@/utils/menu'
   import { handleMenuJump } from '@/utils/jump'
+
+  const route = useRoute()
 
   const settingStore = useSettingStore()
   const menuopenwidth = computed(() => settingStore.getMenuOpenWidth)

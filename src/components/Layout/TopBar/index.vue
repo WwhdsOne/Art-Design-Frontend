@@ -199,6 +199,10 @@
   import { UserService } from '@/api/usersApi'
   import AppConfig from '@/config'
   import { languageOptions } from '@/language'
+  import { useCommon } from '@/composables/useCommon'
+  import { WEB_LINKS } from '@/utils/links'
+  import { themeAnimation } from '@/utils/theme/animation'
+
   const isWindows = navigator.userAgent.includes('Windows')
   const { locale } = useI18n()
 
@@ -226,9 +230,6 @@
   const isTopLeftMenu = computed(() => menuType.value === MenuTypeEnum.TOP_LEFT)
   const isDark = computed(() => settingStore.isDark)
   const tabStyle = computed(() => settingStore.tabStyle)
-  import { useCommon } from '@/composables/useCommon'
-  import { WEB_LINKS } from '@/utils/links'
-  import { themeAnimation } from '@/utils/theme/animation'
 
   const { t } = useI18n()
 

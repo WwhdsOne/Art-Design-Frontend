@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
+  import type { ImageSettings, Level, RenderAs } from 'qrcode.vue'
   import QrcodeVue from 'qrcode.vue'
-  import { ref, reactive, watch } from 'vue'
-  import type { Level, RenderAs, ImageSettings } from 'qrcode.vue'
+  import { reactive, ref, watch } from 'vue'
 
   // 二维码内容
   const qrValue = ref('https://www.lingchen.kim')

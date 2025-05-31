@@ -50,6 +50,7 @@
 <script setup lang="ts">
   import AppConfig from '@/config'
   import LeftView from '@/components/Pages/Login/LeftView.vue'
+
   const router = useRouter()
   const showInputLabel = ref(false)
 

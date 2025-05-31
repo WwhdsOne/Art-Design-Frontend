@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-  import { Picture, View, ChatLineRound } from '@element-plus/icons-vue'
+  import { ChatLineRound, Picture, View } from '@element-plus/icons-vue'
 
   interface Props {
     imageUrl: string

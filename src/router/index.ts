@@ -1,11 +1,11 @@
 import type { App } from 'vue'
+import { ref } from 'vue'
 import {
   createRouter,
   createWebHashHistory,
   RouteLocationNormalized,
   RouteRecordRaw
 } from 'vue-router'
-import { ref } from 'vue'
 import Home from '@views/index/index.vue'
 import AppConfig from '@/config'
 import { useUserStore } from '@/store/modules/user'

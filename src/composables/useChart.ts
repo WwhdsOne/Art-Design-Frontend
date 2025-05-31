@@ -1,6 +1,6 @@
-import { onMounted, onUnmounted, ref, computed } from 'vue'
-import * as echarts from 'echarts'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { EChartsOption } from 'echarts'
+import * as echarts from 'echarts'
 import { useSettingStore } from '@/store/modules/setting'
 import { SystemThemeEnum } from '@/enums/appEnum'
 import { getCssVariable } from '@/utils/colors'

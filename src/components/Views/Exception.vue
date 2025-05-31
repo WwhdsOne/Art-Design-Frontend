@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
   import { HOME_PAGE } from '@/router'
+
   const router = useRouter()
 
   defineProps({

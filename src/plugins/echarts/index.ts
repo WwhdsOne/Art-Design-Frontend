@@ -2,22 +2,22 @@ import * as echarts from 'echarts/core'
 
 import {
   BarChart,
+  GaugeChart,
   LineChart,
-  PieChart,
   MapChart,
   PictorialBarChart,
-  GaugeChart
+  PieChart
 } from 'echarts/charts'
 
 import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  PolarComponent,
   AriaComponent,
-  ParallelComponent,
+  GridComponent,
   LegendComponent,
-  LegendPlainComponent
+  LegendPlainComponent,
+  ParallelComponent,
+  PolarComponent,
+  TitleComponent,
+  TooltipComponent
 } from 'echarts/components'
 
 import { SVGRenderer } from 'echarts/renderers'

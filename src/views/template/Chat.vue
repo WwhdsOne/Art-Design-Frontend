@@ -133,20 +133,20 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { Picture, Paperclip } from '@element-plus/icons-vue'
+  import { onMounted, ref } from 'vue'
+  import { Paperclip, Picture } from '@element-plus/icons-vue'
   import mittBus from '@/utils/mittBus'
   import meAvatar from '@/assets/img/avatar/avatar5.jpg'
+  import avatar5 from '@/assets/img/avatar/avatar5.jpg'
   import aiAvatar from '@/assets/img/avatar/avatar10.jpg'
+  import avatar10 from '@/assets/img/avatar/avatar10.jpg'
   import avatar2 from '@/assets/img/avatar/avatar2.jpg'
   import avatar3 from '@/assets/img/avatar/avatar3.jpg'
   import avatar4 from '@/assets/img/avatar/avatar4.jpg'
-  import avatar5 from '@/assets/img/avatar/avatar5.jpg'
   import avatar6 from '@/assets/img/avatar/avatar6.jpg'
   import avatar7 from '@/assets/img/avatar/avatar7.jpg'
   import avatar8 from '@/assets/img/avatar/avatar8.jpg'
   import avatar9 from '@/assets/img/avatar/avatar9.jpg'
-  import avatar10 from '@/assets/img/avatar/avatar10.jpg'
   import { useCommon } from '@/composables/useCommon'
 
   const { containerMinHeight } = useCommon()

@@ -60,8 +60,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ElMessageBox, ElMessage } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
+  import { ElMessage, ElMessageBox } from 'element-plus'
 
   const dialogType = ref('add')
   const dialogVisible = ref(false)

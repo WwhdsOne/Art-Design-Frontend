@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { MenuThemeType } from '@/types/store'
 import AppConfig from '@/config'
-import { SystemThemeEnum, MenuThemeEnum, MenuTypeEnum, ContainerWidthEnum } from '@/enums/appEnum'
+import { ContainerWidthEnum, MenuThemeEnum, MenuTypeEnum, SystemThemeEnum } from '@/enums/appEnum'
 import { colourBlend, handleElementThemeColor } from '@/utils/colors'
 import { getSysStorage } from '@/utils/storage'
 import { useCeremony } from '@/composables/useCeremony'

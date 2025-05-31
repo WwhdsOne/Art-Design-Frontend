@@ -5,6 +5,7 @@
 <script setup lang="ts">
   import type { EChartsOption } from 'echarts'
   import { useChart, useChartOps } from '@/composables/useChart'
+
   const {
     chartRef,
     initChart,

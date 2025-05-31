@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
   import { useElementHover } from '@vueuse/core'
 
   const emit = defineEmits(['close'])

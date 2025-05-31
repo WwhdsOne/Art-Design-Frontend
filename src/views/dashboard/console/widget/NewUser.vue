@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref, reactive } from 'vue-demi'
+  import { onMounted, reactive, ref } from 'vue-demi'
   import avatar1 from '@/assets/img/avatar/avatar1.jpg'
   import avatar2 from '@/assets/img/avatar/avatar2.jpg'
   import avatar3 from '@/assets/img/avatar/avatar3.jpg'
