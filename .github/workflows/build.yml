@@ -20,17 +20,19 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # 安装 Node.js 和 pnpm
+      # ✅ 推荐使用 Node 20（LTS），更稳定
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '23'
+          node-version: '20'
           cache: 'pnpm'
 
+      # ✅ 正确安装 pnpm 并添加到 PATH
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.8.0
+          version: 8 # 或 10.8.0，保持一致即可
+          run_install: false  # ❗不要让它自动安装依赖
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
