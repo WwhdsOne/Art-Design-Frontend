@@ -78,6 +78,7 @@
           ref="menuTreeRef"
           :data="menuList"
           show-checkbox
+          :default-expand-all="true"
           node-key="id"
           :props="defaultProps"
           :check-strictly="true"

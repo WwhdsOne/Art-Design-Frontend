@@ -16,7 +16,7 @@ const authDirective: Directive = {
 
     // 检查当前绑定的权限值是否存在于权限列表中
     // binding.value 是指令的绑定值，例如 v-auth="'add'" 中的 'add'
-    const hasPermission = authList.some((item) => item.code === binding.value)
+    const hasPermission = authList.some((item) => item.authCode === binding.value)
 
     // 如果没有权限，则从 DOM 中移除该元素
     if (!hasPermission) {

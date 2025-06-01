@@ -48,7 +48,7 @@ function loadComponent(componentPath: string, routeName: string): () => Promise<
 }
 
 interface ConvertedRoute extends Omit<RouteRecordRaw, 'children'> {
-  id?: number
+  id?: string
   children?: ConvertedRoute[]
   component?: RouteRecordRaw['component'] | (() => Promise<any>)
 }

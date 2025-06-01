@@ -8,7 +8,6 @@ import { BaseResult } from '@/types/axios'
 // 菜单接口
 export class menuService {
   // 获取菜单列表，模拟网络请求
-  // 获取菜单列表，模拟网络请求
   static getMenuList(): Promise<{ menuList: MenuListType[]; closeLoading: () => void }> {
     // 启动加载动画
     const loading = ElLoading.service({
@@ -42,9 +41,29 @@ export class menuService {
       })
   }
 
+  static getAllMenus(): Promise<BaseResult> {
+    return request.get({
+      url: '/api/menu/all'
+    })
+  }
+
   static deleteMenu(id: string): Promise<BaseResult> {
     return request.post({
       url: `/api/menu/delete/${id}`
+    })
+  }
+
+  static createAuth(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: '/api/menu/createAuth',
+      data: options.data
+    })
+  }
+
+  static updateAuth(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: '/api/menu/updateAuth',
+      data: options.data
     })
   }
 }

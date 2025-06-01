@@ -22,5 +22,5 @@ export type MenuListType = {
 export type AuthMark = {
   id: string // 权限ID
   name: string // 权限名称
-  code: string // 权限标识
+  authCode: string // 权限标识
 }

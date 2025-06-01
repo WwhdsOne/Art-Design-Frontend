@@ -1,7 +1,7 @@
 <template>
   <div class="page-content">
     <el-row :gutter="20" style="margin-left: 15px">
-      <el-button v-auth="'add'" @click="showModel('menu', null, true)" v-ripple>添加菜单</el-button>
+      <el-button v-auth="'add'" @click="showModel('menu', null)" v-ripple>添加菜单</el-button>
     </el-row>
 
     <art-table :data="tableData">
@@ -34,7 +34,10 @@
                           text-align: right;
                         "
                       >
-                        <el-button size="small" type="primary" @click="showModel('button', item)"
+                        <el-button
+                          size="small"
+                          type="primary"
+                          @click="showModel('button', item, scope.row.id)"
                           >编辑</el-button
                         >
                         <el-button size="small" type="danger" @click="deleteMenu(item)"
@@ -58,8 +61,12 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
           <template #default="scope">
-            <button-table type="add" v-auth="'add'" @click="showModel('menu')" />
-            <button-table type="edit" v-auth="'edit'" @click="showDialog('edit', scope.row)" />
+            <button-table
+              type="add"
+              v-auth="'add'"
+              @click="showModel('menu', null, scope.row.id)"
+            />
+            <button-table type="edit" v-auth="'edit'" @click="showModel('menu', scope.row)" />
             <button-table type="delete" v-auth="'delete'" @click="deleteMenu(scope.row)" />
           </template>
         </el-table-column>
@@ -69,7 +76,7 @@
     <el-dialog :title="dialogTitle" v-model="dialogVisible" width="700px" align-center>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="85px">
         <el-form-item label="菜单类型">
-          <el-radio-group v-model="labelPosition" :disabled="disableMenuType">
+          <el-radio-group v-model="labelPosition">
             <el-radio-button value="menu" label="menu">菜单</el-radio-button>
             <el-radio-button value="button" label="button">权限</el-radio-button>
           </el-radio-group>
@@ -176,8 +183,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="权限标识" prop="authLabel">
-                <el-input v-model="form.authLabel" placeholder="权限标识"></el-input>
+              <el-form-item label="权限标识" prop="authCode">
+                <el-input v-model="form.authCode" placeholder="权限标识"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -187,7 +194,6 @@
                 <el-input-number
                   v-model="form.authSort"
                   style="width: 100%"
-                  @change="handleChange"
                   :min="1"
                   controls-position="right"
                 />
@@ -208,13 +214,11 @@
 </template>
 
 <script setup lang="ts">
-  import { useMenuStore } from '@/store/modules/menu'
   import { ElMessage, ElMessageBox, ElPopover, FormInstance, FormRules } from 'element-plus'
   import { IconTypeEnum } from '@/enums/appEnum'
   import { formatMenuTitle } from '@/utils/menu'
   import { menuService } from '@/api/menuApi'
-  import { onMounted } from 'vue'
-  import { ref } from 'vue'
+  import { onMounted, ref, reactive, computed, nextTick } from 'vue' // Added missing imports
 
   const tableData = ref<any[]>([])
   onMounted(async () => {
@@ -222,16 +226,20 @@
   })
 
   const fetchTableData = async () => {
-    // ✅ 注意这里加了括号和 await
-    tableData.value = computed(() => useMenuStore().getMenuList).value
+    menuService.getAllMenus().then((res) => {
+      if (res.code === 200) {
+        tableData.value = res.data
+      }
+    })
   }
   const dialogVisible = ref(false)
   const form = reactive({
+    id: null, // Add an ID field for editing
     name: '',
     component: '',
     path: '',
     sort: 1,
-    parentID: '', // 如果需要
+    parentID: '',
     meta: {
       title: '',
       icon: '',
@@ -242,24 +250,22 @@
       link: '',
       isIframe: false,
       keepAlive: false,
-      authCode: '',
       isInMainContainer: false
     },
-    // 权限 (修改这部分)
     authName: '',
-    authLabel: '',
-    authIcon: '',
+    authCode: '',
     authSort: 1
   })
 
   const resetForm = () => {
     formRef.value?.resetFields()
     Object.assign(form, {
+      id: null,
       name: '',
       component: '',
       path: '',
       sort: 1,
-      parentID: '', // 如果需要
+      parentID: '',
       meta: {
         title: '',
         icon: '',
@@ -272,10 +278,8 @@
         keepAlive: false,
         isInMainContainer: false
       },
-      // 权限 (修改这部分)
       authName: '',
-      authLabel: '',
-      authIcon: '',
+      authCode: '',
       authSort: 1
     })
   }
@@ -294,9 +298,8 @@
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
     component: [{ required: true, message: '请输入组件路径', trigger: 'blur' }],
-    // 修改这部分
     authName: [{ required: true, message: '请输入权限名称', trigger: 'blur' }],
-    authLabel: [{ required: true, message: '请输入权限权限标识', trigger: 'blur' }]
+    authCode: [{ required: true, message: '请输入权限标识', trigger: 'blur' }]
   })
   const isEdit = ref(false)
   const formRef = ref<FormInstance>()
@@ -305,133 +308,179 @@
     return isEdit.value ? `编辑${type}` : `新建${type}`
   })
 
-  const showDialog = (type: string, row: any) => {
-    showModel('menu', row, true)
-  }
-
-  const handleChange = () => {
-    fetchTableData()
-  }
-
   const submitForm = async () => {
     if (!formRef.value) return
 
     await formRef.value.validate(async (valid) => {
       if (valid) {
         try {
-          // const params =
-          //   labelPosition.value === 'menu'
-          //     ? {
-          //         title: form.title,
-          //         path: form.path,
-          //         name: form.name,
-          //         icon: form.icon,
-          //         sort: form.sort,
-          //         parentID: form.parentID,
-          //         keepAlive: form.keepAlive,
-          //         isHide: form.isHide,
-          //         link: form.link
-          //       }
-          //     : {
-          //         parentID: form.parentID,
-          //         title: form.authName,
-          //         name: form.authLabel,
-          //         icon: form.authIcon,
-          //         sort: form.authSort
-          //       }
-
-          if (isEdit.value) {
-            // await menuStore.updateMenu(params)
+          if (labelPosition.value === 'menu') {
+            // const params = {
+            //   id: form.id, // Include ID for editing
+            //   name: form.name,
+            //   component: form.component,
+            //   path: form.path,
+            //   sort: form.sort,
+            //   parentID: form.parentID,
+            //   meta: {
+            //     title: form.meta.title,
+            //     icon: form.meta.icon,
+            //     showBadge: form.meta.showBadge,
+            //     showTextBadge: form.meta.showTextBadge,
+            //     isHide: form.meta.isHide,
+            //     isHideTab: form.meta.isHideTab,
+            //     link: form.meta.link,
+            //     isIframe: form.meta.isIframe,
+            //     keepAlive: form.meta.keepAlive,
+            //     isInMainContainer: form.meta.isInMainContainer
+            //   },
+            //   type: 1 // Assuming 1 for menu
+            // }
+            if (isEdit.value) {
+              // await menuService.updateMenu({ data: JSON.stringify(params) }).then((res) => {
+              //   if (res.code === 200) {
+              //     ElMessage.success(res.message)
+              //     dialogVisible.value = false
+              //     resetForm()
+              //     fetchTableData()
+              //   } else {
+              //     ElMessage.error(res.message)
+              //   }
+              // })
+            } else {
+              // await menuService.createMenu({ data: JSON.stringify(params) }).then((res) => {
+              //   if (res.code === 200) {
+              //     ElMessage.success(res.message)
+              //     dialogVisible.value = false
+              //     resetForm()
+              //     fetchTableData()
+              //   } else {
+              //     ElMessage.error(res.message)
+              //   }
+              // })
+            }
           } else {
-            // await menuStore.addMenu(params)
+            // labelPosition.value === 'button'
+            const params = {
+              id: form.id, // Include ID for editing
+              parentID: form.parentID,
+              title: form.authName,
+              sort: form.authSort,
+              authCode: form.authCode,
+              type: 3 // Assuming 3 for button/permission
+            }
+            if (isEdit.value) {
+              await menuService.updateAuth({ data: JSON.stringify(params) }).then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success(res.message)
+                  dialogVisible.value = false
+                  resetForm()
+                  fetchTableData()
+                } else {
+                  ElMessage.error(res.message)
+                }
+              })
+            } else {
+              await menuService.createAuth({ data: JSON.stringify(params) }).then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success(res.message)
+                  dialogVisible.value = false
+                  resetForm()
+                  fetchTableData()
+                } else {
+                  ElMessage.error(res.message)
+                }
+              })
+            }
           }
-
-          ElMessage.success(`${isEdit.value ? '编辑' : '新增'}成功`)
-          dialogVisible.value = false
-          // 刷新列表
-          // await menuStore.getMenuList()
-        } catch {
+        } catch (error) {
+          console.error('Submission error:', error)
           ElMessage.error(`${isEdit.value ? '编辑' : '新增'}失败`)
         }
       }
     })
   }
 
-  const showModel = (type: string, row?: any, lock: boolean = false) => {
+  const showModel = (type: string, row?: any, parentID?: string) => {
+    resetForm() // Always reset form first
     dialogVisible.value = true
     labelPosition.value = type
-    isEdit.value = false
-    lockMenuType.value = lock
-    resetForm()
+    isEdit.value = !!row // Set isEdit based on whether a row is provided
 
-    if (row) {
-      isEdit.value = true
-      nextTick(() => {
-        // 回显数据
+    // Set parentID if provided (for adding sub-menus/permissions)
+    if (parentID) {
+      form.parentID = parentID
+    } else if (row && row.parentID) {
+      // If editing a sub-item, retain its parentID
+      form.parentID = row.parentID
+    } else {
+      form.parentID = '' // Clear parentID if no parent is specified
+    }
+
+    nextTick(() => {
+      if (row) {
+        form.id = row.id // Populate ID for editing
         if (type === 'menu') {
-          // 菜单数据回显
-          // console.log(row.meta)
-          form.name = formatMenuTitle(row.meta.title)
+          form.name = row.name // Use row.name directly
           form.path = row.path
-          form.meta.icon = row.meta.icon
-          form.sort = row.meta.sort || 1
-          form.meta.keepAlive = row.meta.keepAlive
-          form.meta.isHide = row.meta.isHide || true
-          form.meta.link = row.meta.link
-          form.meta.isIframe = row.meta.isIframe || false
+          form.sort = row.sort || 1 // Use row.sort
+          if (row.meta) {
+            form.meta.title = row.meta.title
+            form.meta.icon = row.meta.icon
+            form.meta.showBadge = row.meta.showBadge || false
+            form.meta.showTextBadge = row.meta.showTextBadge || ''
+            form.meta.isHide = row.meta.isHide || false
+            form.meta.isHideTab = row.meta.isHideTab || false
+            form.meta.link = row.meta.link || ''
+            form.meta.isIframe = row.meta.isIframe || false
+            form.meta.keepAlive = row.meta.keepAlive || false
+            form.meta.isInMainContainer = row.meta.isInMainContainer || false
+            // Make sure authList is also carried over for menu editing if it exists
+            if (row.meta.authList) {
+              ;(form.meta as any).authList = row.meta.authList
+            }
+          }
         } else {
-          // 权限按钮数据回显
-          form.authName = row.title
-          form.authLabel = row.auth_mark
-          form.authIcon = row.icon || ''
+          // type === 'button' (permission)
+          form.authName = row.name
+          form.authCode = row.authCode
           form.authSort = row.sort || 1
         }
-      })
-    }
+      }
+    })
   }
 
   const deleteMenu = async (row: any) => {
     try {
-      // 只有权限的code字段不为空
-      if (!row.code || row.code === '') {
-        await ElMessageBox.confirm('确定要删除该权限吗？删除后无法恢复', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
+      let confirmMessage
+      if (row.type === 3) {
+        // Assuming type 3 is for permissions
+        confirmMessage = '确定要删除该权限吗？删除后无法恢复'
       } else {
-        await ElMessageBox.confirm('确定要删除该菜单吗？删除后无法恢复', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
+        // Assuming type 1 for menus
+        confirmMessage = '确定要删除该菜单吗？删除后无法恢复'
       }
+
+      await ElMessageBox.confirm(confirmMessage, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+
       await menuService.deleteMenu(row.id).then((res) => {
         if (res.code === 200) {
           ElMessage.success('删除成功')
+          fetchTableData() // Refresh data after successful deletion
         } else {
-          ElMessage.error('删除失败')
+          ElMessage.error(res.message)
         }
       })
-    } catch (error) {
+    } catch (error: any) {
       if (error !== 'cancel') {
-        ElMessage.error('删除失败')
+        ElMessage.error('删除失败: ' + error.message || error)
       }
     }
   }
-
-  // 修改计算属性，增加锁定控制参数
-  const disableMenuType = computed(() => {
-    // 编辑权限时锁定为权限类型
-    if (isEdit.value && labelPosition.value === 'button') return true
-    // 编辑菜单时锁定为菜单类型
-    if (isEdit.value && labelPosition.value === 'menu') return true
-    // 顶部添加菜单按钮时锁定为菜单类型
-    return !!(!isEdit.value && labelPosition.value === 'menu' && lockMenuType.value)
-  })
-
-  // 添加一个控制变量
-  const lockMenuType = ref(false)
 </script>
 
 <style lang="scss" scoped>
