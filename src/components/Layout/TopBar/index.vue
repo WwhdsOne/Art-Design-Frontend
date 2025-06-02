@@ -150,18 +150,18 @@
                   </div>
                 </div>
                 <ul class="user-menu">
-                  <li @click="goPage('/UserCenter')">
+                  <li @click="goPage('/userCenter')">
                     <i class="menu-icon iconfont-sys">&#xe734;</i>
                     <span class="menu-txt">{{ $t('topBar.user.userCenter') }}</span>
                   </li>
-                  <li @click="toDocs()">
-                    <i class="menu-icon iconfont-sys" style="font-size: 15px">&#xe828;</i>
-                    <span class="menu-txt">{{ $t('topBar.user.docs') }}</span>
-                  </li>
-                  <li @click="toGithub()">
-                    <i class="menu-icon iconfont-sys">&#xe8d6;</i>
-                    <span class="menu-txt">{{ $t('topBar.user.github') }}</span>
-                  </li>
+                  <!--                  <li @click="toDocs()">-->
+                  <!--                    <i class="menu-icon iconfont-sys" style="font-size: 15px">&#xe828;</i>-->
+                  <!--                    <span class="menu-txt">{{ $t('topBar.user.docs') }}</span>-->
+                  <!--                  </li>-->
+                  <!--                  <li @click="toGithub()">-->
+                  <!--                    <i class="menu-icon iconfont-sys">&#xe8d6;</i>-->
+                  <!--                    <span class="menu-txt">{{ $t('topBar.user.github') }}</span>-->
+                  <!--                  </li>-->
                   <li @click="lockScreen()">
                     <i class="menu-icon iconfont-sys">&#xe817;</i>
                     <span class="menu-txt">{{ $t('topBar.user.lockScreen') }}</span>
@@ -200,7 +200,6 @@
   import AppConfig from '@/config'
   import { languageOptions } from '@/language'
   import { useCommon } from '@/composables/useCommon'
-  import { WEB_LINKS } from '@/utils/links'
   import { themeAnimation } from '@/utils/theme/animation'
 
   const isWindows = navigator.userAgent.includes('Windows')
@@ -278,13 +277,13 @@
     router.push(path)
   }
 
-  const toDocs = () => {
-    window.open(WEB_LINKS.DOCS)
-  }
-
-  const toGithub = () => {
-    window.open(WEB_LINKS.GITHUB)
-  }
+  // const toDocs = () => {
+  //   window.open(WEB_LINKS.DOCS)
+  // }
+  //
+  // const toGithub = () => {
+  //   window.open(WEB_LINKS.GITHUB)
+  // }
 
   const toHome = () => {
     router.push(HOME_PAGE)

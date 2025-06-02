@@ -132,11 +132,6 @@
 
           <el-row :gutter="20">
             <el-col :span="6">
-              <el-form-item label="是否显示" prop="isHide">
-                <el-switch v-model="form.meta.isHide" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
               <el-form-item label="标签页隐藏" prop="isHideTab">
                 <el-switch v-model="form.meta.isHideTab" />
               </el-form-item>
@@ -166,10 +161,15 @@
             </el-col>
           </el-row>
 
-          <el-row :gutter="20">
+          <el-row :gutter="6">
             <el-col :span="12">
               <el-form-item label="主容器显示" prop="isInMainContainer">
                 <el-switch v-model="form.meta.isInMainContainer" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="菜单是否显示" prop="isHide" label-width="120px">
+                <el-switch v-model="form.meta.isHide" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -218,7 +218,7 @@
   import { IconTypeEnum } from '@/enums/appEnum'
   import { formatMenuTitle } from '@/utils/menu'
   import { menuService } from '@/api/menuApi'
-  import { onMounted, ref, reactive, computed, nextTick } from 'vue' // Added missing imports
+  import { computed, nextTick, onMounted, reactive, ref } from 'vue' // Added missing imports
 
   const tableData = ref<any[]>([])
   onMounted(async () => {
