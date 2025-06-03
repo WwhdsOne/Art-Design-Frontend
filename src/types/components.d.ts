@@ -81,6 +81,7 @@ declare module 'vue' {
     FormSelect: typeof import('./../components/Form/FormSelect.vue')['default']
     HBarChart: typeof import('./../components/Widgets/Charts/HBarChart.vue')['default']
     IconSelector: typeof import('./../components/Icons/IconSelector.vue')['default']
+    ICPRecord: typeof import('./../components/record/ICPRecord.vue')['default']
     ImageCard: typeof import('./../components/Widgets/Cards/ImageCard.vue')['default']
     KLineChart: typeof import('./../components/Widgets/Charts/KLineChart.vue')['default']
     LeftView: typeof import('./../components/Pages/Login/LeftView.vue')['default']

@@ -102,17 +102,14 @@
     const hasNumber = /[0-9]/.test(password)
     const hasUpper = /[A-Z]/.test(password)
     const hasLower = /[a-z]/.test(password)
-    const hasSpecial = /[!@#%&(){};':",.<>?]/.test(password)
-    const minLength = 8 // 你可以根据需要设置最小长度
-
-    return hasNumber && hasUpper && hasLower && hasSpecial && password.length >= minLength
+    return hasNumber && hasUpper && hasLower
   }
 
   const validatePass = (rule: any, value: string, callback: any) => {
     if (value === '') {
       callback(new Error('密码不能为空'))
     } else if (!validateStrongPassword(value)) {
-      callback(new Error('密码应包含数字、大写字母、小写字母、特殊字符')) // 密码强度不足提示
+      callback(new Error('密码应包含数字、大写字母、小写字母')) // 密码强度不足提示
     } else {
       if (formData.confirmPassword !== '') {
         formRef.value?.validateField('confirmPassword')
