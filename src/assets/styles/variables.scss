@@ -49,7 +49,6 @@
   --art-gray-900-rgb: 7, 20, 55;
 
   // Text color
-  --art-text-muted: #99a1b7;
   --art-text-gray-100: #f9f9f9;
   --art-text-gray-200: #f1f1f4;
   --art-text-gray-300: #dbdfe9;
@@ -73,8 +72,6 @@
 
   // Root card box、shadow
   --art-root-card-box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.03);
-  --art-root-card-border-color: #f1f1f4;
-
   // Theme background color
   --art-bg-color: #fafbfc; // 最底部背景颜色
   --art-main-bg-color: #ffffff;
@@ -130,7 +127,6 @@ html.dark {
   --art-gray-900-rgb: 245, 245, 245;
 
   // Text color
-  --art-text-muted: #636674;
   --art-text-gray-100: #1b1c22;
   --art-text-gray-200: #26272f;
   --art-text-gray-300: #363843;
@@ -154,8 +150,6 @@ html.dark {
 
   // Root card box、shadow
   --art-root-card-box-shadow: none;
-  --art-root-card-border-color: #1e2027;
-
   // Theme background color
   --art-bg-color: #070707;
   --art-main-bg-color: #161618;
