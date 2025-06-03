@@ -19,7 +19,7 @@
     padding: 10px 0;
     color: #5c6b77;
     text-align: center;
-    background-color: rgb(216.8 235.6 255);
+    background-color: var(--art-main-bg-color);
   }
 
   .record-link {
