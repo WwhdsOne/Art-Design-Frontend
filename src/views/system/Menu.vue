@@ -98,7 +98,7 @@
 
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="菜单名称" prop="title">
+              <el-form-item label="菜单名称" prop="meta.title">
                 <el-input v-model="form.meta.title" placeholder="菜单名称" />
               </el-form-item>
             </el-col>
@@ -111,8 +111,8 @@
 
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="图标" prop="icon">
-                <icon-selector :iconType="iconType" :defaultIcon="form.meta.icon" width="229px" />
+              <el-form-item label="图标" prop="meta.icon">
+                <icon-selector :iconType="iconType" v-model="form.meta.icon" width="229px" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -161,14 +161,14 @@
             </el-col>
           </el-row>
 
-          <el-row :gutter="6">
-            <el-col :span="12">
+          <el-row :gutter="20">
+            <el-col :span="5">
               <el-form-item label="主容器显示" prop="isInMainContainer">
                 <el-switch v-model="form.meta.isInMainContainer" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="菜单是否显示" prop="isHide" label-width="120px">
+              <el-form-item label="不显示在菜单栏" prop="isHide" label-width="120px">
                 <el-switch v-model="form.meta.isHide" />
               </el-form-item>
             </el-col>
@@ -249,7 +249,7 @@
       isHideTab: false,
       link: '',
       isIframe: false,
-      keepAlive: false,
+      keepAlive: true,
       isInMainContainer: false
     },
     authName: '',
@@ -292,8 +292,8 @@
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
     path: [{ required: true, message: '请输入路由地址', trigger: 'blur' }],
-    icon: [{ required: true, message: '请选择图标', trigger: 'blur' }],
-    title: [
+    'meta.icon': [{ required: true, message: '请选择图标', trigger: 'blur' }],
+    'meta.title': [
       { required: true, message: '请输入菜单名称', trigger: 'blur' },
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
@@ -315,49 +315,49 @@
       if (valid) {
         try {
           if (labelPosition.value === 'menu') {
-            // const params = {
-            //   id: form.id, // Include ID for editing
-            //   name: form.name,
-            //   component: form.component,
-            //   path: form.path,
-            //   sort: form.sort,
-            //   parentID: form.parentID,
-            //   meta: {
-            //     title: form.meta.title,
-            //     icon: form.meta.icon,
-            //     showBadge: form.meta.showBadge,
-            //     showTextBadge: form.meta.showTextBadge,
-            //     isHide: form.meta.isHide,
-            //     isHideTab: form.meta.isHideTab,
-            //     link: form.meta.link,
-            //     isIframe: form.meta.isIframe,
-            //     keepAlive: form.meta.keepAlive,
-            //     isInMainContainer: form.meta.isInMainContainer
-            //   },
-            //   type: 1 // Assuming 1 for menu
-            // }
+            const params = {
+              id: form.id, // Include ID for editing
+              name: form.name,
+              component: form.component,
+              path: form.path,
+              sort: form.sort,
+              parentID: form.parentID || '-1',
+              meta: {
+                title: form.meta.title,
+                icon: form.meta.icon,
+                showBadge: form.meta.showBadge,
+                showTextBadge: form.meta.showTextBadge,
+                isHide: form.meta.isHide,
+                isHideTab: form.meta.isHideTab,
+                link: form.meta.link,
+                isIframe: form.meta.isIframe,
+                keepAlive: form.meta.keepAlive,
+                isInMainContainer: form.meta.isInMainContainer
+              },
+              type: form.parentID ? 2 : 1 // Assuming 1 for menu
+            }
             if (isEdit.value) {
-              // await menuService.updateMenu({ data: JSON.stringify(params) }).then((res) => {
-              //   if (res.code === 200) {
-              //     ElMessage.success(res.message)
-              //     dialogVisible.value = false
-              //     resetForm()
-              //     fetchTableData()
-              //   } else {
-              //     ElMessage.error(res.message)
-              //   }
-              // })
+              await menuService.updateMenu({ data: JSON.stringify(params) }).then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success(res.message)
+                  dialogVisible.value = false
+                  resetForm()
+                  fetchTableData()
+                } else {
+                  ElMessage.error(res.message)
+                }
+              })
             } else {
-              // await menuService.createMenu({ data: JSON.stringify(params) }).then((res) => {
-              //   if (res.code === 200) {
-              //     ElMessage.success(res.message)
-              //     dialogVisible.value = false
-              //     resetForm()
-              //     fetchTableData()
-              //   } else {
-              //     ElMessage.error(res.message)
-              //   }
-              // })
+              await menuService.createMenu({ data: JSON.stringify(params) }).then((res) => {
+                if (res.code === 200) {
+                  ElMessage.success(res.message)
+                  dialogVisible.value = false
+                  resetForm()
+                  fetchTableData()
+                } else {
+                  ElMessage.error(res.message)
+                }
+              })
             }
           } else {
             // labelPosition.value === 'button'
@@ -424,6 +424,7 @@
           form.name = row.name // Use row.name directly
           form.path = row.path
           form.sort = row.sort || 1 // Use row.sort
+          form.component = row.component
           if (row.meta) {
             form.meta.title = row.meta.title
             form.meta.icon = row.meta.icon

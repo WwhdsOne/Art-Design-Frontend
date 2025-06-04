@@ -66,4 +66,18 @@ export class menuService {
       data: options.data
     })
   }
+
+  static createMenu(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: '/api/menu/createMenu',
+      data: options.data
+    })
+  }
+
+  static updateMenu(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: '/api/menu/updateMenu',
+      data: options.data
+    })
+  }
 }

@@ -3,21 +3,14 @@
     <div
       class="select"
       @click="handleClick"
-      :style="{ width: props.width }"
+      :style="{ width: width }"
       :class="[size, { 'is-disabled': disabled }, { 'has-icon': selectValue }]"
     >
       <div class="icon">
-        <i
-          :class="`iconfont-sys ${selectValue}`"
-          v-show="props.iconType === IconTypeEnum.CLASS_NAME"
-        ></i>
-        <i
-          class="iconfont-sys"
-          v-html="selectValue"
-          v-show="props.iconType === IconTypeEnum.UNICODE"
-        ></i>
+        <i :class="`iconfont-sys ${selectValue}`" v-show="iconType === IconTypeEnum.CLASS_NAME"></i>
+        <i class="iconfont-sys" v-html="selectValue" v-show="iconType === IconTypeEnum.UNICODE"></i>
       </div>
-      <div class="text"> {{ props.text }} </div>
+      <div class="text"> {{ text }} </div>
       <div class="arrow">
         <i class="iconfont-sys arrow-icon">&#xe709;</i>
         <i class="iconfont-sys clear-icon" @click.stop="clearIcon">&#xe83a;</i>
@@ -52,21 +45,18 @@
 </template>
 
 <script setup lang="ts">
+  import { computed, ref } from 'vue'
   import { IconTypeEnum } from '@/enums/appEnum'
   import { extractIconClasses } from '@/utils/iconfont'
 
-  const emits = defineEmits(['getIcon'])
-
-  const iconsList = extractIconClasses()
-
   const props = defineProps({
+    modelValue: {
+      type: String,
+      default: ''
+    },
     iconType: {
       type: String as PropType<IconTypeEnum>,
       default: IconTypeEnum.CLASS_NAME
-    },
-    defaultIcon: {
-      type: String,
-      default: ''
     },
     text: {
       type: String,
@@ -86,27 +76,21 @@
     }
   })
 
-  const selectValue = ref(props.defaultIcon)
+  const emit = defineEmits(['update:modelValue'])
 
-  watch(
-    () => props.defaultIcon,
-    (newVal) => {
-      selectValue.value = newVal
-    },
-    { immediate: true }
-  )
+  const selectValue = computed({
+    get: () => props.modelValue,
+    set: (val: string) => emit('update:modelValue', val)
+  })
+
+  const iconsList = extractIconClasses()
 
   const activeName = ref('icons')
   const visible = ref(false)
 
   const selectorIcon = (icon: any) => {
-    if (props.iconType === IconTypeEnum.CLASS_NAME) {
-      selectValue.value = icon.className
-    } else {
-      selectValue.value = icon.unicode
-    }
+    selectValue.value = props.iconType === IconTypeEnum.CLASS_NAME ? icon.className : icon.unicode
     visible.value = false
-    emits('getIcon', selectValue.value)
   }
 
   const handleClick = () => {
@@ -117,7 +101,6 @@
 
   const clearIcon = () => {
     selectValue.value = ''
-    emits('getIcon', selectValue.value)
   }
 </script>
 
