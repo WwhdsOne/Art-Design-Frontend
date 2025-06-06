@@ -545,7 +545,6 @@
             height: 80px;
             margin-top: 120px;
             overflow: hidden;
-            background-image: url('你的头像地址');
             background-position: center;
 
             /* 替换为 form.avatar */

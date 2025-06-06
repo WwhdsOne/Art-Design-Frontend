@@ -36,6 +36,7 @@
       @update:pageSize="handlePageSizeChange"
     >
       <template #default>
+        <el-table-column label="ID" prop="id" width="80px" v-if="columns[8].show" />
         <el-table-column
           label="用户名"
           prop="avatar"
@@ -105,6 +106,9 @@
                   <el-dropdown-item @click="() => openStatusDialog(scope.row)">
                     调整状态
                   </el-dropdown-item>
+                  <el-dropdown-item @click="() => openRoleDialog(scope.row)">
+                    分配角色
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -133,6 +137,18 @@
         <el-button type="primary" @click="submitStatusChange">确定</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="roleDialogVisible" title="分配角色" width="30%">
+      <el-checkbox-group v-model="checkedRoles">
+        <el-checkbox v-for="role in roleList" :key="role.id" :label="role.id">
+          {{ role.name }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitRolesChange">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -140,6 +156,7 @@
   import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
   import { UserService } from '@/api/usersApi'
   import { onMounted, ref } from 'vue'
+  import { SimpleRole, Role } from '@/types/role'
 
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
@@ -147,6 +164,12 @@
   const total = ref(0)
 
   const statusDialogVisible = ref(false)
+
+  const roleDialogVisible = ref(false)
+  const checkedRoles = ref<string[]>([])
+  const currentUserID = ref('')
+  const currentOriginalRoles = ref<string[]>([])
+  const roleList = ref<SimpleRole[]>([]) // 菜单树
 
   const form = reactive({
     id: 1,
@@ -175,6 +198,37 @@
     form.status = row.status
     form.id = row.id
     statusDialogVisible.value = true
+  }
+
+  function openRoleDialog(row: any) {
+    roleDialogVisible.value = true
+    currentUserID.value = row.id
+    currentOriginalRoles.value = (row.roles as Role[]).map((role: Role) => role.id)
+    UserService.getUserRole({ data: row.id }).then((res) => {
+      if (res.code === 200) {
+        roleList.value = res.data.roles
+        checkedRoles.value = res.data.has_role_ids
+      } else {
+        ElMessage.error(res.message)
+      }
+    })
+  }
+
+  function submitRolesChange() {
+    UserService.updateUserRole({
+      data: {
+        user_id: currentUserID.value,
+        original_role_ids: currentOriginalRoles.value,
+        role_ids: checkedRoles.value
+      }
+    }).then((res) => {
+      if (res.code === 200) {
+        ElMessage.success('用户角色绑定成功')
+        roleDialogVisible.value = false
+      } else {
+        ElMessage.error(res.message)
+      }
+    })
   }
 
   function submitStatusChange() {
@@ -280,7 +334,8 @@
     { name: '状态', show: true },
     { name: '创建日期', show: true },
     { name: '最后更新时间', show: true },
-    { name: '邮箱', show: true }
+    { name: '邮箱', show: true },
+    { name: 'ID', show: true }
   ])
 
   const searchFormRef = ref<FormInstance>()

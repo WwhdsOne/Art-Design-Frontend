@@ -82,4 +82,19 @@ export class UserService {
       data: options.data
     })
   }
+
+  static getUserRole(options: { data: number }): Promise<BaseResult> {
+    return request.post({
+      url: `/api/user/getUserRole/${options.data}` // 将 data 拼接到 URL 路径中
+    })
+  }
+
+  // 更新角色对应的菜单
+  static updateUserRole(options: { data: any }): Promise<BaseResult> {
+    // ✅ 直接使用 options.data 字符串
+    return request.post({
+      url: '/api/user/updateUserRoleBinding',
+      data: options.data
+    })
+  }
 }

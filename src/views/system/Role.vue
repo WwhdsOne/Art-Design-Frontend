@@ -193,7 +193,7 @@
     id: string
     title: string
     children?: SimpleMenu[]
-    parend_id: number
+    parent_id: string
   }
   const menuList = ref<SimpleMenu[]>([]) // 菜单树
   const menuTreeRef = ref<InstanceType<typeof ElTree>>()
