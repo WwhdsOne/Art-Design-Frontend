@@ -90,7 +90,11 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="组件路径" prop="component">
+              <el-form-item
+                label="组件路径"
+                prop="component"
+                :required="!form.meta.link && form.parentID !== '-1'"
+              >
                 <el-input v-model="form.component" placeholder="组件路径" />
               </el-form-item>
             </el-col>
@@ -297,7 +301,16 @@
       { required: true, message: '请输入菜单名称', trigger: 'blur' },
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
-    component: [{ required: true, message: '请输入组件路径', trigger: 'blur' }],
+    component:
+      !form.meta.link && form.parentID !== '-1'
+        ? [
+            {
+              required: true,
+              message: '请输入组件路径',
+              trigger: 'blur'
+            }
+          ]
+        : [],
     authName: [{ required: true, message: '请输入权限名称', trigger: 'blur' }],
     authCode: [{ required: true, message: '请输入权限标识', trigger: 'blur' }]
   })
@@ -414,7 +427,7 @@
       // If editing a sub-item, retain its parentID
       form.parentID = row.parentID
     } else {
-      form.parentID = '' // Clear parentID if no parent is specified
+      form.parentID = '-1'
     }
 
     nextTick(() => {

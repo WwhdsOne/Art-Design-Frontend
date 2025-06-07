@@ -156,7 +156,7 @@
   import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
   import { UserService } from '@/api/usersApi'
   import { onMounted, ref } from 'vue'
-  import { SimpleRole, Role } from '@/types/role'
+  import { Role, SimpleRole } from '@/types/role'
 
   const tableData = ref<any[]>([])
   const currentPage = ref(1)
