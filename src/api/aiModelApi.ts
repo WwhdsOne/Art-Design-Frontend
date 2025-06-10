@@ -9,4 +9,12 @@ export class AIModelService {
       data: options.data
     })
   }
+
+  // 对话
+  static chatCompletionStream(options: { data: string }): Promise<any> {
+    return request.post({
+      url: '/api/aimodel/chat-completion',
+      data: options.data
+    })
+  }
 }
