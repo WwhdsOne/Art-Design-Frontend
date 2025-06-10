@@ -31,14 +31,15 @@
             @show="showPopover"
             v-if="layout.indexOf('column') !== -1"
           >
-            <el-checkbox-group v-model="colOptions" :min="1">
+            <el-checkbox-group v-model="colSelect" :min="1">
               <el-checkbox
-                v-for="(item, index) in colSelect"
+                v-for="(item, index) in colOptions"
                 :label="item"
                 :key="item"
                 @change="changeColumn($event, index)"
               />
             </el-checkbox-group>
+
             <template #reference>
               <el-button :icon="Operation"></el-button>
             </template>
@@ -75,8 +76,8 @@
   })
 
   const showSearchWrap = ref(true)
-  const colOptions = ref([])
-  const colSelect = ref([])
+  const colOptions = ref<string[]>([])
+  const colSelect = ref<string[]>([])
   const columnChage = ref(false)
 
   onMounted(() => {
@@ -96,12 +97,14 @@
   // 列显示隐藏
   const showPopover = () => {
     if (!columnChage.value) {
-      let ops: any = []
-      props.columns.map((item: any) => {
-        ops.push(item.name)
+      colOptions.value = []
+      colSelect.value = []
+      props.columns.forEach((item: any) => {
+        colOptions.value.push(item.name)
+        if (item.show) {
+          colSelect.value.push(item.name)
+        }
       })
-      colOptions.value = ops
-      colSelect.value = ops
       columnChage.value = true
     }
   }
