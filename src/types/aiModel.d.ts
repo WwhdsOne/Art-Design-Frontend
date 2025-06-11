@@ -16,3 +16,14 @@ export type AIModel = {
   max_context_tokens: number
   model_type: string
 }
+
+export interface SimpleAIModel {
+  id: string
+  model: string
+  icon: string
+}
+
+export interface AIMessages {
+  role: string
+  content: string
+}

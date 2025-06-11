@@ -17,4 +17,11 @@ export class AIModelService {
       data: options.data
     })
   }
+
+  // 获取精简模型信息
+  static getSimpleModelList(): Promise<any> {
+    return request.get({
+      url: '/api/aimodel/getSimpleModelList'
+    })
+  }
 }

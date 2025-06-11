@@ -1,32 +1,181 @@
 <template>
-  <div class="chat-container">
-    <div class="chat-window">
-      <div v-for="(msg, index) in messages" :key="index" class="chat-message">
-        <span class="role">{{ msg.role }}:</span>
-        <span class="content">{{ msg.content }}</span>
+  <div class="chat-wrapper">
+    <!-- 左侧历史会话栏 -->
+    <aside class="chat-history">
+      <div class="history-section" v-for="(group, label) in groupedSessions" :key="label">
+        <h4>{{ label }}</h4>
+        <ul>
+          <!--          <li-->
+          <!--            v-for="session in group"-->
+          <!--            :key="session.id"-->
+          <!--            @click="loadSession(session)"-->
+          <!--            :class="{ active: currentSession?.id === session.id }"-->
+          <!--          >-->
+          <!--            {{ session.title || '未命名对话' }}-->
+          <!--          </li>-->
+        </ul>
       </div>
-    </div>
+    </aside>
 
-    <div class="chat-input">
-      <input v-model="userInput" @keyup.enter="sendMessage" placeholder="请输入内容..." />
-      <button @click="sendMessage">发送</button>
+    <!-- 右侧聊天主界面 -->
+    <div class="chat-container">
+      <div class="chat-window" ref="chatWindow">
+        <div v-for="(msg, index) in messages" :key="index" class="chat-message">
+          <span class="role">{{ msg.role }}:</span>
+          <!-- 使用 v-html 渲染 HTML 内容 -->
+          <span class="content" v-html="msg.content"></span>
+        </div>
+      </div>
+
+      <div class="model-selector">
+        <el-form-item prop="model">
+          <el-select
+            v-model="selectedModelId"
+            placeholder="请选择模型"
+            clearable
+            filterable
+            style="width: 25%; margin-top: 5px; margin-bottom: 5px"
+          >
+            <el-option
+              v-for="model in models"
+              :key="model.id"
+              :label="model.model"
+              :value="model.id"
+            >
+              <div style="display: flex; align-items: center; justify-content: space-between">
+                <span>{{ model.model }}</span>
+                <img
+                  v-if="model.icon"
+                  :src="model.icon"
+                  alt="icon"
+                  style="width: 30px; height: 20px; margin-left: 8px"
+                />
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </div>
+
+      <div class="chat-input-wrapper">
+        <!-- 输入框 -->
+        <textarea v-model="userInput" class="chat-textarea" placeholder="和我聊聊天吧"></textarea>
+
+        <!-- 底部工具栏 + 发送按钮 -->
+        <div class="chat-toolbar">
+          <!-- 左下角：工具todo -->
+
+          <div class="chat-tools">
+            <!--            <el-button text icon="el-icon-lightning">推理</el-button>-->
+            <!--            <el-button text icon="el-icon-time">沉思</el-button>-->
+            <!--            <el-button text icon="el-icon-connection">联网</el-button>-->
+          </div>
+
+          <!-- 右下角：发送 -->
+          <div class="chat-send-button" @click="sendMessage">
+            <img src="https://chatglm.cn/img/send.6d617ab7.svg" alt="发送" class="send-icon" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-  import { ref } from 'vue'
+<script setup lang="ts">
+  import { ref, computed, nextTick, onMounted } from 'vue'
   import { useUserStore } from '@/store/modules/user.js'
+  import { AIModelService } from '@/api/aiModelApi.js'
+  import { AIMessages, SimpleAIModel } from '@/types/aiModel'
+  import { marked } from 'marked'
+  import { markedHighlight } from 'marked-highlight'
+  import hljs from 'highlight.js'
+  import 'highlight.js/styles/github.css' // 选择你喜欢的代码高亮样式
+
+  // 初始化 marked 渲染器
+  const renderer = new marked.Renderer()
 
   const userInput = ref('')
-  const messages = ref([{ role: 'system', content: '欢迎使用 DeepSeek Chat！' }])
-  let currentAiMessage = ref(null) // 当前正在接收的AI消息引用
+  const messages = ref([{ role: 'system', content: '欢迎使用 Chat！' }])
+  const currentAiMessage = ref<AIMessages | null>(null)
+  const chatWindow = ref<HTMLDivElement>()
+  // const currentSession = ref(null)
+  import DOMPurify from 'dompurify'
 
-  async function fetchStream(url, token, data) {
-    // 创建一个新的AI消息对象
-    const aiMessage = { role: 'ai', content: '' }
+  const selectedModelId = ref()
+
+  onMounted(() => {
+    fetchModelList()
+    selectedModelId.value = models.value[0]?.id
+  })
+
+  // 模拟可选模型列表，可从后端接口获取
+  const models = ref<SimpleAIModel[]>([])
+  const fetchModelList = () => {
+    AIModelService.getSimpleModelList().then((res) => {
+      if (res.code === 200) {
+        models.value = res.data
+      }
+    })
+  }
+
+  // 自动滚动到底部
+  function scrollToBottom() {
+    nextTick(() => {
+      if (chatWindow.value) {
+        chatWindow.value.scrollTop = chatWindow.value.scrollHeight
+      }
+    })
+  }
+
+  // 模拟历史会话数据（真实项目应从 API 获取）
+  const allSessions = ref([
+    { id: 's1', title: '今天的对话', timestamp: new Date() },
+    { id: 's2', title: '三天前对话', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+    { id: 's3', title: '十天前对话', timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+    { id: 's4', title: '一月前对话', timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+  ])
+
+  const groupedSessions = computed(() => {
+    const now = Date.now()
+    return {
+      今天: allSessions.value.filter((s) => now - s.timestamp.getTime() < 24 * 60 * 60 * 1000),
+      '7天内': allSessions.value.filter(
+        (s) =>
+          now - s.timestamp.getTime() >= 24 * 60 * 60 * 1000 &&
+          now - s.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000
+      ),
+      '30天内': allSessions.value.filter(
+        (s) =>
+          now - s.timestamp.getTime() >= 7 * 24 * 60 * 60 * 1000 &&
+          now - s.timestamp.getTime() < 30 * 24 * 60 * 60 * 1000
+      ),
+      更早: allSessions.value.filter((s) => now - s.timestamp.getTime() >= 30 * 24 * 60 * 60 * 1000)
+    }
+  })
+
+  const fetchStream = async (url: string, token: string, data: any) => {
+    const aiMessage = { role: 'assistant', content: '' }
     messages.value.push(aiMessage)
     currentAiMessage.value = aiMessage
+
+    // 创建 marked 实例
+    marked.use({ async: false })
+    // 可以在这里自定义渲染器选项
+    marked.setOptions({
+      renderer,
+      breaks: true, // 转换换行符为 <br>
+      gfm: true // 启用 GitHub Flavored Markdown
+    })
+
+    // ✅ 正确配置代码高亮
+    marked.use(
+      markedHighlight({
+        langPrefix: 'hljs language-',
+        highlight(code, lang) {
+          const language = hljs.getLanguage(lang) ? lang : 'shell'
+          return hljs.highlight(code, { language }).value
+        }
+      })
+    )
 
     const response = await fetch(url, {
       method: 'POST',
@@ -44,7 +193,8 @@
 
     const reader = response.body.getReader()
     const decoder = new TextDecoder('utf-8')
-    let buffer = ''
+    let buffer: string = ''
+    let rawContent = '' // 存储原始 markdown 内容
 
     while (true) {
       const { value, done } = await reader.read()
@@ -52,38 +202,55 @@
 
       buffer += decoder.decode(value, { stream: true })
 
-      // 按行拆分，逐条处理
-      let lines = buffer.split('\n')
-      buffer = lines.pop() // 保留不完整部分给下次循环
+      // 按双换行分割完整消息
+      let messages = buffer.split('\n\n')
+      buffer = messages.pop() || '' // 留下最后可能未完整的数据
 
-      for (const line of lines) {
-        if (line.trim()) {
-          // 处理SSE格式的数据
-          // 假设格式为 "data: 内容"
+      for (const msg of messages) {
+        const lines = msg.split('\n')
+        for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const content = line.substring(6).trim()
-            // 跳过空数据和结束标记
-            if (content && content !== '[DONE]') {
-              // 实时更新AI消息内容
-              currentAiMessage.value.content += content
+            const jsonStr = line.replace(/^data:\s?/, '') // 提取 JSON 字符串
+            if (jsonStr && jsonStr !== '[DONE]') {
+              try {
+                const parsed = JSON.parse(jsonStr)
+                const content = parsed.content || ''
+                if (content) {
+                  // 换行前加两个空格，方便 Markdown 渲染换行
+                  rawContent += content.replace(/\n/g, '  \n')
+                  currentAiMessage.value.content = DOMPurify.sanitize(
+                    marked.parse(rawContent).toString()
+                  )
+                  scrollToBottom()
+                }
+              } catch (e) {
+                console.error('JSON 解析失败:', e)
+              }
             }
           }
         }
       }
     }
 
-    // 处理最后剩余的buffer
-    if (buffer.trim()) {
-      if (buffer.startsWith('data: ')) {
-        const content = buffer.substring(6).trim()
-        if (content && content !== '[DONE]') {
-          currentAiMessage.value.content += content
+    // 处理剩下的 buffer 内容
+    if (buffer.trim().startsWith('data: ')) {
+      const jsonStr = buffer.replace(/^data:\s?/, '')
+      if (jsonStr && jsonStr !== '[DONE]') {
+        try {
+          const parsed = JSON.parse(jsonStr)
+          const content = parsed.content || ''
+          if (content) {
+            rawContent += content.replace(/\n/g, '  \n')
+            currentAiMessage.value.content = DOMPurify.sanitize(marked.parse(rawContent).toString())
+            scrollToBottom()
+          }
+        } catch (e) {
+          console.error('剩余数据 JSON 解析失败:', e)
         }
       }
     }
 
-    console.log('流式读取结束')
-    currentAiMessage.value = null // 重置当前消息引用
+    currentAiMessage.value = null
   }
 
   const sendMessage = () => {
@@ -94,28 +261,67 @@
     userInput.value = ''
 
     const { accessToken } = useUserStore()
-    // todo待后续调整为灵活选择的ID
+    scrollToBottom()
+
     fetchStream('/api/aimodel/chat-completion', accessToken, {
-      prompt: question,
-      id: '47851401207874706'
+      messages: messages.value,
+      id: selectedModelId.value
     })
   }
+
+  // function loadSession(session) {
+  //   currentSession.value = session
+  //   // 在真实项目中：从后端拉取该 session 的 message 列表
+  //   messages.value = [{ role: 'system', content: `已加载对话：${session.title}` }]
+  // }
 </script>
 
 <style scoped>
+  .chat-wrapper {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--art-main-bg-color);
+  }
+
+  .chat-history {
+    width: 250px;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: var(--art-main-bg-color);
+    border-right: 1px solid #ddd;
+  }
+
+  .chat-history h4 {
+    margin: 1rem 0 0.5rem;
+  }
+
+  .chat-history ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  .chat-history li {
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .chat-history li.active,
+  .chat-history li:hover {
+    background-color: var(--art-text-gray-300);
+  }
+
   .chat-container {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    max-width: 600px;
     padding: 1rem;
-    margin: 0 auto;
-    border: 1px solid #ddd;
   }
 
   .chat-window {
     flex: 1;
-    max-height: 400px;
-    margin-bottom: 1rem;
+    max-height: calc(100vh - 120px);
     overflow-y: auto;
     border-bottom: 1px solid #ccc;
   }
@@ -124,14 +330,89 @@
     margin: 0.5rem 0;
   }
 
+  .chat-message .content pre {
+    padding: 12px;
+    overflow-x: auto; /* 横向滚动（如果代码太长） */
+    font-family: 'Courier New', monospace;
+    word-break: break-all; /* 防止长代码溢出 */
+    white-space: pre-wrap; /* 允许代码换行 */
+    background: #f5f5f5;
+    border-radius: 4px;
+  }
+
+  /* 行内代码样式 */
+  .chat-message .content code:not(pre code) {
+    padding: 2px 4px;
+    font-family: 'Courier New', monospace;
+    background: #f0f0f0;
+    border-radius: 3px;
+  }
+
   .role {
     margin-right: 0.5rem;
     font-weight: bold;
   }
 
-  .chat-input {
+  .chat-input-wrapper {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    width: 98%;
+    padding: 12px;
+    background: var(--art-main-bg-color);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+  }
+
+  .chat-textarea {
+    width: 100%;
+    min-height: 80px;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    background-color: var(--art-main-bg-color);
+    border: none;
+  }
+
+  .chat-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .chat-tools {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chat-send-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    background-color: transparent;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+  }
+
+  .chat-send-button:hover {
+    background-color: #e6f0ff; /* 鼠标悬停时淡蓝背景 */
+  }
+
+  .chat-send-button:hover .send-icon {
+    filter: brightness(1.2); /* 或者让图标更亮 */
+    transform: scale(1.15); /* 悬停时放大 */
+  }
+
+  .send-icon {
+    width: 35px;
+    height: 35px;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease;
   }
 
   input {
@@ -141,5 +422,15 @@
 
   button {
     padding: 0.5rem 1rem;
+  }
+
+  .model-selector {
+    margin-bottom: 0.5rem;
+  }
+
+  .model-selector select {
+    padding: 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
 </style>
