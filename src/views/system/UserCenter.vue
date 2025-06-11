@@ -207,7 +207,6 @@
   const handleAvatarUpload = (options: UploadRequestOptions): Promise<any> => {
     const formData = new FormData()
     formData.append('file', options.file)
-    console.log(formData.get('file'))
 
     // 返回 Promise，符合 http-request 类型要求
     return new Promise((resolve, reject) => {

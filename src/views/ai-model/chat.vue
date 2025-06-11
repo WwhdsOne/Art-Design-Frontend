@@ -20,10 +20,20 @@
     <!-- 右侧聊天主界面 -->
     <div class="chat-container">
       <div class="chat-window" ref="chatWindow">
-        <div v-for="(msg, index) in messages" :key="index" class="chat-message">
-          <span class="role">{{ msg.role }}:</span>
-          <!-- 使用 v-html 渲染 HTML 内容 -->
-          <span class="content" v-html="msg.content"></span>
+        <div
+          v-for="(msg, index) in messages"
+          :key="index"
+          :class="['chat-message', msg.role === 'user' ? 'chat-message-user' : 'chat-message-ai']"
+        >
+          <!-- 如果是用户消息，直接用纯文本 -->
+          <template v-if="msg.role === 'user'">
+            <span>{{ msg.content }}</span>
+          </template>
+
+          <!-- 如果是 AI 消息，渲染带 markdown-body 的 HTML -->
+          <template v-else>
+            <span class="markdown-body" v-html="msg.content"></span>
+          </template>
         </div>
       </div>
 
@@ -58,7 +68,13 @@
 
       <div class="chat-input-wrapper">
         <!-- 输入框 -->
-        <textarea v-model="userInput" class="chat-textarea" placeholder="和我聊聊天吧"></textarea>
+
+        <textarea
+          v-model="userInput"
+          @keydown.enter.prevent="sendMessage"
+          class="chat-textarea"
+          placeholder="和我聊聊天吧"
+        ></textarea>
 
         <!-- 底部工具栏 + 发送按钮 -->
         <div class="chat-toolbar">
@@ -85,18 +101,39 @@
   import { useUserStore } from '@/store/modules/user.js'
   import { AIModelService } from '@/api/aiModelApi.js'
   import { AIMessages, SimpleAIModel } from '@/types/aiModel'
-  import { marked } from 'marked'
-  import { markedHighlight } from 'marked-highlight'
-  import hljs from 'highlight.js'
   import 'highlight.js/styles/github.css' // 选择你喜欢的代码高亮样式
+  import MarkdownIt from 'markdown-it'
+  import 'github-markdown-css/github-markdown-light.css'
 
-  // 初始化 marked 渲染器
-  const renderer = new marked.Renderer()
+  import hljs from 'highlight.js'
+  import markdownItFootnote from 'markdown-it-footnote'
+
+  const md: MarkdownIt = new MarkdownIt({
+    html: true,
+    linkify: true,
+    typographer: true,
+    breaks: true,
+    highlight(code: string, lang: string) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return `<pre class="hljs"><code>${hljs.highlight(code, { language: lang }).value}</code></pre>`
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_) {
+          /* empty */
+        }
+      }
+      return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`
+    }
+  })
+
+  // 加载插件
+  md.use(markdownItFootnote)
 
   const userInput = ref('')
   const messages = ref([{ role: 'system', content: '欢迎使用 Chat！' }])
   const currentAiMessage = ref<AIMessages | null>(null)
   const chatWindow = ref<HTMLDivElement>()
+
   // const currentSession = ref(null)
   import DOMPurify from 'dompurify'
 
@@ -104,7 +141,6 @@
 
   onMounted(() => {
     fetchModelList()
-    selectedModelId.value = models.value[0]?.id
   })
 
   // 模拟可选模型列表，可从后端接口获取
@@ -113,6 +149,7 @@
     AIModelService.getSimpleModelList().then((res) => {
       if (res.code === 200) {
         models.value = res.data
+        selectedModelId.value = models.value[0]?.id
       }
     })
   }
@@ -157,26 +194,6 @@
     messages.value.push(aiMessage)
     currentAiMessage.value = aiMessage
 
-    // 创建 marked 实例
-    marked.use({ async: false })
-    // 可以在这里自定义渲染器选项
-    marked.setOptions({
-      renderer,
-      breaks: true, // 转换换行符为 <br>
-      gfm: true // 启用 GitHub Flavored Markdown
-    })
-
-    // ✅ 正确配置代码高亮
-    marked.use(
-      markedHighlight({
-        langPrefix: 'hljs language-',
-        highlight(code, lang) {
-          const language = hljs.getLanguage(lang) ? lang : 'shell'
-          return hljs.highlight(code, { language }).value
-        }
-      })
-    )
-
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -218,9 +235,7 @@
                 if (content) {
                   // 换行前加两个空格，方便 Markdown 渲染换行
                   rawContent += content.replace(/\n/g, '  \n')
-                  currentAiMessage.value.content = DOMPurify.sanitize(
-                    marked.parse(rawContent).toString()
-                  )
+                  currentAiMessage.value.content = DOMPurify.sanitize(md.render(rawContent))
                   scrollToBottom()
                 }
               } catch (e) {
@@ -241,7 +256,7 @@
           const content = parsed.content || ''
           if (content) {
             rawContent += content.replace(/\n/g, '  \n')
-            currentAiMessage.value.content = DOMPurify.sanitize(marked.parse(rawContent).toString())
+            currentAiMessage.value.content = DOMPurify.sanitize(md.render(rawContent))
             scrollToBottom()
           }
         } catch (e) {
@@ -285,7 +300,7 @@
   }
 
   .chat-history {
-    width: 250px;
+    width: 150px;
     padding: 1rem;
     overflow-y: auto;
     background-color: var(--art-main-bg-color);
@@ -316,41 +331,55 @@
     display: flex;
     flex: 1;
     flex-direction: column;
+    max-width: 100%; /* 确保容器不会无限扩展 */
     padding: 1rem;
   }
 
   .chat-window {
-    flex: 1;
-    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 80vh;
+    padding: 10px;
     overflow-y: auto;
-    border-bottom: 1px solid #ccc;
   }
 
+  /* 公共气泡样式 */
   .chat-message {
-    margin: 0.5rem 0;
+    position: relative;
+    display: inline-block;
+    max-width: 60%;
+    padding: 10px 15px;
+    overflow-wrap: break-word;
+    border-radius: 15px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
   }
 
-  .chat-message .content pre {
-    padding: 12px;
-    overflow-x: auto; /* 横向滚动（如果代码太长） */
-    font-family: 'Courier New', monospace;
-    word-break: break-all; /* 防止长代码溢出 */
-    white-space: pre-wrap; /* 允许代码换行 */
-    background: #f5f5f5;
-    border-radius: 4px;
+  /* 用户消息：右侧 */
+  .chat-message-user {
+    margin-left: auto; /* 右对齐 */
+    color: white;
+    background-color: #4f93ff;
+    border-bottom-right-radius: 0;
   }
 
-  /* 行内代码样式 */
-  .chat-message .content code:not(pre code) {
-    padding: 2px 4px;
-    font-family: 'Courier New', monospace;
-    background: #f0f0f0;
-    border-radius: 3px;
+  /* AI消息：左侧 */
+  .chat-message-ai {
+    margin-right: auto; /* 左对齐 */
+    color: black;
+    background-color: var(--art-main-bg-color);
+    border-bottom-left-radius: 0;
   }
 
   .role {
-    margin-right: 0.5rem;
+    margin-right: 6px;
     font-weight: bold;
+  }
+
+  /* markdown-body 根据需要自行调整 */
+  .markdown-body {
+    display: inline-block;
+    background: var(--art-main-bg-color);
   }
 
   .chat-input-wrapper {
