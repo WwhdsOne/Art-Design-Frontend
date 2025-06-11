@@ -87,6 +87,12 @@
           width="150"
           v-if="columns[11].show"
         />
+        <el-table-column
+          label="最大输入Token数"
+          prop="max_generate_tokens"
+          width="150"
+          v-if="columns[13].show"
+        />
         <el-table-column label="模型类型" prop="model_type" width="120" v-if="columns[12].show" />
 
         <!--        <el-table-column fixed="right" label="操作" width="150">-->
@@ -237,7 +243,8 @@
     { name: '货币', key: 'currency', show: true },
     { name: '启用状态', key: 'enabled', show: true },
     { name: '最大上下文 Tokens', key: 'max_context_tokens', show: true },
-    { name: '模型类型', key: 'model_type', show: true }
+    { name: '模型类型', key: 'model_type', show: true },
+    { name: '最大输入Token数', key: 'max_generate_tokens', show: false }
   ])
 
   const changeColumn = (list: any) => {

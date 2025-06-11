@@ -58,7 +58,7 @@
                   v-if="model.icon"
                   :src="model.icon"
                   alt="icon"
-                  style="width: 30px; height: 20px; margin-left: 8px"
+                  style="width: 16px; height: 16px; margin-left: 8px"
                 />
               </div>
             </el-option>
