@@ -101,7 +101,6 @@ $font-color: #24292e;
 }
 
 .line-numbers-mode .copy-btn {
-  display: inline-block;
   display: flex;
   position: absolute;
   right: 10px;
@@ -203,7 +202,6 @@ $font-color: #24292e;
   line-height: 1.5;
   color: $font-color;
   font-size: 16px;
-  line-height: 1.5;
   word-wrap: break-word;
 }
 
@@ -226,7 +224,6 @@ $font-color: #24292e;
 
 .markdown-body strong {
   font-weight: inherit;
-  font-weight: bolder;
 }
 
 .markdown-body p br {
@@ -686,24 +683,6 @@ $font-color: #24292e;
   border-bottom-color: #eee;
 }
 
-.markdown-body kbd {
-  display: inline-block;
-  padding: 3px 5px;
-  font:
-    11px SFMono-Regular,
-    Consolas,
-    Liberation Mono,
-    Menlo,
-    monospace;
-  line-height: 10px;
-  color: #444d56;
-  vertical-align: middle;
-  background-color: #fafbfc;
-  border: 1px solid #d1d5da;
-  border-radius: 3px;
-  box-shadow: inset 0 -1px 0 #d1d5da;
-}
-
 .markdown-body:after,
 .markdown-body:before {
   display: table;
@@ -770,7 +749,7 @@ $font-color: #24292e;
 .markdown-body li {
   line-height: 28px;
   font-size: 14px;
-  word-wrap: break-all;
+  overflow-wrap: break-word;
   list-style: disc;
   margin-left: 10px;
 }
@@ -830,7 +809,6 @@ $font-color: #24292e;
   box-sizing: initial;
   background-color: #fff;
   border: 1px solid #eee;
-  border: 1px solid var(--art-c-border-2);
   cursor: zoom-in;
 }
 
@@ -840,57 +818,6 @@ $font-color: #24292e;
 
 .markdown-body img[align='left'] {
   padding-right: 20px;
-}
-
-.markdown-body code {
-  padding: 0.2em 0.4em;
-  margin: 0;
-  font-size: 85%;
-  background-color: rgba(27, 31, 35, 0.05);
-  border-radius: 3px;
-}
-
-.markdown-body pre {
-  word-wrap: normal;
-}
-
-.markdown-body pre > code {
-  padding: 0;
-  margin: 0;
-  font-size: 100%;
-  word-break: normal;
-  white-space: pre;
-  background: transparent;
-  border: 0;
-}
-
-.markdown-body .highlight {
-  margin-bottom: 16px;
-}
-
-.markdown-body .highlight pre {
-  margin-bottom: 0;
-  word-break: normal;
-}
-
-.markdown-body .highlight pre,
-.markdown-body pre {
-  padding: 15px 20px 15px 0;
-  overflow: auto;
-  font-size: 92%;
-  line-height: 1.6;
-}
-
-.markdown-body pre code {
-  display: inline;
-  max-width: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  line-height: inherit;
-  word-wrap: normal;
-  background-color: initial;
-  border: 0;
 }
 
 .markdown-body .commit-tease-sha {

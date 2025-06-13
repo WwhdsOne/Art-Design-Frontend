@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler", // ✅ 推荐：适用于 Vite / ESM
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,

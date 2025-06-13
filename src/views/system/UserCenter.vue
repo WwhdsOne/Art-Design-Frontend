@@ -181,7 +181,7 @@
   import type { UploadProps } from 'element-plus'
   import { FormInstance, FormRules } from 'element-plus'
   import { UserService } from '@/api/usersApi'
-  import type { UploadRequestOptions } from 'element-plus/es/components/upload/src/upload.d'
+  import type { UploadRequestOptions } from 'element-plus'
 
   const userStore = useUserStore()
   const userInfo = computed(() => userStore.getUserInfo).value

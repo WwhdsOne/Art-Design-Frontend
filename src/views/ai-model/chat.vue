@@ -32,7 +32,7 @@
 
           <!-- 如果是 AI 消息，渲染带 markdown-body 的 HTML -->
           <template v-else>
-            <span class="markdown-body" v-html="msg.content"></span>
+            <div class="markdown-body" v-html="msg.content"></div>
           </template>
         </div>
       </div>
@@ -100,34 +100,13 @@
   import { ref, computed, nextTick, onMounted } from 'vue'
   import { useUserStore } from '@/store/modules/user.js'
   import { AIModelService } from '@/api/aiModelApi.js'
+  import 'github-markdown-css/github-markdown.css'
   import { AIMessages, SimpleAIModel } from '@/types/aiModel'
-  import 'highlight.js/styles/github.css' // 选择你喜欢的代码高亮样式
-  import MarkdownIt from 'markdown-it'
-  import 'github-markdown-css/github-markdown-light.css'
+  import Prism from 'prismjs'
+  import { useMarkdown } from '@/utils/markdown'
+  import DOMPurify from 'dompurify'
 
-  import hljs from 'highlight.js'
-  import markdownItFootnote from 'markdown-it-footnote'
-
-  const md: MarkdownIt = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    breaks: true,
-    highlight(code: string, lang: string) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return `<pre class="hljs"><code>${hljs.highlight(code, { language: lang }).value}</code></pre>`
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) {
-          /* empty */
-        }
-      }
-      return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`
-    }
-  })
-
-  // 加载插件
-  md.use(markdownItFootnote)
+  const md = useMarkdown()
 
   const userInput = ref('')
   const messages = ref([{ role: 'system', content: '欢迎使用 Chat！' }])
@@ -135,7 +114,6 @@
   const chatWindow = ref<HTMLDivElement>()
 
   // const currentSession = ref(null)
-  import DOMPurify from 'dompurify'
 
   const selectedModelId = ref()
 
@@ -231,7 +209,7 @@
             if (jsonStr && jsonStr !== '[DONE]') {
               try {
                 const parsed = JSON.parse(jsonStr)
-                const content = parsed.content || ''
+                const content = parsed.v || ''
                 if (content) {
                   // 换行前加两个空格，方便 Markdown 渲染换行
                   rawContent += content.replace(/\n/g, '  \n')
@@ -253,7 +231,7 @@
       if (jsonStr && jsonStr !== '[DONE]') {
         try {
           const parsed = JSON.parse(jsonStr)
-          const content = parsed.content || ''
+          const content = parsed.v || ''
           if (content) {
             rawContent += content.replace(/\n/g, '  \n')
             currentAiMessage.value.content = DOMPurify.sanitize(md.render(rawContent))
@@ -264,8 +242,8 @@
         }
       }
     }
-
     currentAiMessage.value = null
+    Prism.highlightAll()
   }
 
   const sendMessage = () => {
@@ -291,7 +269,7 @@
   // }
 </script>
 
-<style scoped>
+<style>
   .chat-wrapper {
     display: flex;
     height: 100vh;
@@ -376,12 +354,6 @@
     font-weight: bold;
   }
 
-  /* markdown-body 根据需要自行调整 */
-  .markdown-body {
-    display: inline-block;
-    background: var(--art-main-bg-color);
-  }
-
   .chat-input-wrapper {
     display: flex;
     flex-direction: column;
@@ -461,5 +433,19 @@
     padding: 0.4rem;
     border: 1px solid #ccc;
     border-radius: 4px;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5em; /* 确保缩进正常 */
+    list-style: revert !important; /* 恢复默认样式 */
+  }
+
+  ul {
+    list-style-type: disc; /* 实心圆点 */
+  }
+
+  ol {
+    list-style-type: decimal; /* 数字 */
   }
 </style>
