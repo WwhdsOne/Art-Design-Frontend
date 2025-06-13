@@ -70,11 +70,14 @@
         <!-- 输入框 -->
 
         <textarea
+          ref="textareaRef"
           v-model="userInput"
-          @keydown.enter.prevent="sendMessage"
+          @input="adjustHeight"
+          @keydown="handleKeydown"
           class="chat-textarea"
           placeholder="和我聊聊天吧"
-        ></textarea>
+          rows="1"
+        />
 
         <!-- 底部工具栏 + 发送按钮 -->
         <div class="chat-toolbar">
@@ -129,6 +132,44 @@
         models.value = res.data
         selectedModelId.value = models.value[0]?.id
       }
+    })
+  }
+
+  const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+  function adjustHeight() {
+    const el = textareaRef.value
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // 插入 \n 到光标处
+        e.preventDefault()
+        insertNewlineAtCursor()
+      } else {
+        // 普通 Enter，发送消息
+        e.preventDefault()
+        sendMessage()
+      }
+    }
+  }
+
+  // 插入换行符在光标处
+  function insertNewlineAtCursor() {
+    const textarea = document.activeElement as HTMLTextAreaElement
+    if (!textarea) return
+
+    const { selectionStart, selectionEnd } = textarea
+    const value = userInput.value
+    userInput.value = value.slice(0, selectionStart) + '\n' + value.slice(selectionEnd)
+
+    // 重新设置光标位置
+    nextTick(() => {
+      textarea.selectionStart = textarea.selectionEnd = selectionStart + 1
     })
   }
 
@@ -337,21 +378,18 @@
   .chat-message-user {
     margin-left: auto; /* 右对齐 */
     color: white;
+    white-space: pre-wrap; /* ← 关键点 */
     background-color: #4f93ff;
     border-bottom-right-radius: 0;
   }
 
-  /* AI消息：左侧 */
+  /* AI消息：左侧，允许最大宽度100% */
   .chat-message-ai {
+    max-width: 100%;
     margin-right: auto; /* 左对齐 */
     color: black;
     background-color: var(--art-main-bg-color);
     border-bottom-left-radius: 0;
-  }
-
-  .role {
-    margin-right: 6px;
-    font-weight: bold;
   }
 
   .chat-input-wrapper {
@@ -365,14 +403,15 @@
   }
 
   .chat-textarea {
-    width: 100%;
-    min-height: 80px;
+    width: 98%;
+    max-height: calc(1.5em * 5); /* 最多 5 行 */
+    padding: 8px;
+    overflow-y: auto;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.5; /* 行高用来计算最大高度 */
     resize: none;
-    outline: none;
-    background-color: var(--art-main-bg-color);
-    border: none;
+    border: 1px solid #ccc;
+    border-radius: 8px;
   }
 
   .chat-toolbar {
@@ -426,7 +465,7 @@
   }
 
   .model-selector {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .model-selector select {

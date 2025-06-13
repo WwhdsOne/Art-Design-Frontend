@@ -2,7 +2,6 @@ import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } 
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import EmojiText from '../emojo'
-import { BaseResult } from '@/types/axios'
 
 const axiosInstance = axios.create({
   timeout: 15000,
@@ -49,72 +48,20 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// 刷新 Token 机制
-let isRefreshing = false
-let requestsQueue: ((token: string) => void)[] = []
-let hasShownSessionExpired = false
-
-async function refreshToken(userStore: ReturnType<typeof useUserStore>) {
-  try {
-    const res = await api.get<BaseResult>({
-      url: `/api/auth/refreshToken/${userStore.getUserInfo.id}`
-    })
-
-    if (res.code === 200) {
-      userStore.setToken(res.data)
-      requestsQueue.forEach((cb) => cb(userStore.accessToken))
-      requestsQueue = []
-      return userStore.accessToken
-    } else {
-      throw new Error('刷新失败')
-    }
-  } finally {
-    isRefreshing = false
-  }
-}
-
-// 响应拦截器
+// 响应拦截器（删除刷新 Token 相关逻辑）
 axiosInstance.interceptors.response.use(
-  async (response: AxiosResponse): Promise<AxiosResponse> => {
-    const { data, config } = response
+  (response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
+    const { data } = response
     const userStore = useUserStore()
 
     switch (data.code) {
       case 200:
-        hasShownSessionExpired = false
         return response
 
       case 401:
-        if (!hasShownSessionExpired) {
-          ElMessage.error('登录已过期，请重新登录')
-          hasShownSessionExpired = true
-        }
+        ElMessage.error('登录已过期，请重新登录')
         userStore.logOut()
         return Promise.reject(new Error('登录已过期'))
-
-      case 402: {
-        const originalRequest = config
-
-        if (!isRefreshing) {
-          isRefreshing = true
-          try {
-            const newToken = await refreshToken(userStore)
-            originalRequest.headers.Authorization = newToken
-            return axiosInstance.request(originalRequest)
-          } catch (err) {
-            ElMessage.error('刷新 Token 失败，请重新登录')
-            userStore.logOut()
-            return Promise.reject(err)
-          }
-        } else {
-          return new Promise((resolve) => {
-            requestsQueue.push((token) => {
-              originalRequest.headers.Authorization = token
-              resolve(axiosInstance.request(originalRequest))
-            })
-          })
-        }
-      }
 
       default:
         ElMessage.error(`${data.message || '请求错误'}`)
