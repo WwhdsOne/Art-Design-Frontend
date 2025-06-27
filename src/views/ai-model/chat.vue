@@ -297,7 +297,7 @@
     const { accessToken } = useUserStore()
     scrollToBottom()
 
-    fetchStream('/api/aimodel/chat-completion', accessToken, {
+    fetchStream('/api/ai/model/chat-completion', accessToken, {
       messages: messages.value,
       id: selectedModelId.value
     })
