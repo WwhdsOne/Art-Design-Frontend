@@ -37,14 +37,15 @@
         </div>
       </div>
 
-      <div class="model-selector">
+      <div class="model-selector" style="display: flex; gap: 10px">
         <el-form-item prop="model">
           <el-select
             v-model="selectedModelId"
             placeholder="请选择模型"
             clearable
             filterable
-            style="width: 25%; margin-top: 5px; margin-bottom: 5px"
+            style="width: 150px; margin-top: 5px; margin-bottom: 5px"
+            @change="onModelSelectChange"
           >
             <el-option
               v-for="model in models"
@@ -62,6 +63,24 @@
                 />
               </div>
             </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item prop="agent">
+          <el-select
+            v-model="selectedAgentId"
+            placeholder="请选择智能体"
+            clearable
+            filterable
+            style="width: 150px; margin-bottom: 5px"
+            @change="onAgentSelectChange"
+          >
+            <el-option
+              v-for="agent in agents"
+              :key="agent.id"
+              :label="agent.name"
+              :value="agent.id"
+            />
           </el-select>
         </el-form-item>
       </div>
@@ -108,6 +127,7 @@
   import Prism from 'prismjs'
   import { useMarkdown } from '@/utils/markdown'
   import DOMPurify from 'dompurify'
+  import { AIAgentService } from '@/api/aiAgentApi'
 
   const md = useMarkdown()
 
@@ -118,19 +138,40 @@
 
   // const currentSession = ref(null)
 
-  const selectedModelId = ref()
-
   onMounted(() => {
     fetchModelList()
+    fetchAgentList()
   })
 
-  // 模拟可选模型列表，可从后端接口获取
+  const selectedAgentId = ref()
+  const selectedModelId = ref()
+
+  const onModelSelectChange = () => {
+    selectedAgentId.value = undefined // 清空智能体
+  }
+  const onAgentSelectChange = () => {
+    selectedModelId.value = undefined // 清空模型
+  }
+
+  // 可选模型列表，从后端接口获取
   const models = ref<SimpleAIModel[]>([])
   const fetchModelList = () => {
     AIModelService.getSimpleModelList().then((res) => {
       if (res.code === 200) {
         models.value = res.data
         selectedModelId.value = models.value[0]?.id
+      }
+    })
+  }
+
+  // 可选智能体列表，从后端接口获取
+  const agents = ref<{ id: number; name: string }[]>([])
+
+  const fetchAgentList = async () => {
+    // 替换为实际接口
+    AIAgentService.getSimpleAgentList().then((res) => {
+      if (res.code === 200) {
+        agents.value = res.data
       }
     })
   }
@@ -266,7 +307,7 @@
       }
     }
 
-    // 处理剩下的 buffer 内容
+    // 处理剩余 buffer
     if (buffer.trim().startsWith('data: ')) {
       const jsonStr = buffer.replace(/^data:\s?/, '')
       if (jsonStr && jsonStr !== '[DONE]') {
@@ -283,24 +324,40 @@
         }
       }
     }
+
     currentAiMessage.value = null
     Prism.highlightAll()
   }
 
   const sendMessage = () => {
-    if (!userInput.value.trim()) return
+    const input = userInput.value.trim()
+    if (!input) return
 
-    const question = userInput.value
+    const question = input
     messages.value.push({ role: 'user', content: question })
     userInput.value = ''
 
     const { accessToken } = useUserStore()
     scrollToBottom()
 
-    fetchStream('/api/ai/model/chat-completion', accessToken, {
-      messages: messages.value,
-      id: selectedModelId.value
-    })
+    const history = messages.value.map((msg) => ({
+      role: msg.role,
+      content: msg.content
+    }))
+
+    if (selectedAgentId.value) {
+      // 智能体接口
+      fetchStream('/api/ai/agent/chat-completion', accessToken, {
+        messages: history,
+        id: selectedAgentId.value
+      })
+    } else {
+      // 模型接口
+      fetchStream('/api/ai/model/chat-completion', accessToken, {
+        messages: history,
+        id: selectedModelId.value
+      })
+    }
   }
 
   // function loadSession(session) {
