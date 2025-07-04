@@ -21,7 +21,7 @@ export class AIAgentService {
   // 上传智能体文件
   static uploadAgentDocument(formData: FormData, agentId: string): Promise<BaseResult> {
     return request.post({
-      url: `/api/ai/agent//uploadAgentDocument/${agentId}`,
+      url: `/api/ai/agent/uploadAgentDocument/${agentId}`,
       data: formData
     })
   }
