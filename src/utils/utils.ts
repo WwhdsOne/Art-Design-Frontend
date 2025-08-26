@@ -224,3 +224,24 @@ export function removeHtmlTags(str: string = ''): string {
 export function isIframe(url: string) {
   return url.includes('/outside/iframe')
 }
+
+/**
+ * 过滤对象中的空值
+ * @param obj - 原始表单对象
+ * @returns 新对象，空字符串、空数组、null、undefined 字段被删除
+ */
+export function filterEmptyParams(obj: Record<string, any>) {
+  const result: Record<string, any> = {}
+  for (const key in obj) {
+    const value = obj[key]
+    if (
+      value !== '' &&
+      value !== null &&
+      value !== undefined &&
+      !(Array.isArray(value) && value.length === 0)
+    ) {
+      result[key] = value
+    }
+  }
+  return result
+}

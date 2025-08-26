@@ -73,7 +73,7 @@
     </el-dialog>
 
     <el-dialog v-model="permissionDialog" title="菜单权限" width="30%">
-      <div :style="{ maxHeight: '500px', overflowY: 'scroll' }">
+      <div style="max-height: 500px; overflow-y: auto">
         <el-tree
           ref="menuTreeRef"
           :data="menuList"
