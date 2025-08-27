@@ -74,6 +74,9 @@ importers:
       qrcode.vue:
         specifier: ^3.6.0
         version: 3.6.0(vue@3.5.20(typescript@5.8.3))
+      types:
+        specifier: link:@/types
+        version: link:@/types
       vue:
         specifier: ^3.5.20
         version: 3.5.20(typescript@5.8.3)

@@ -99,80 +99,21 @@
             </el-link>
           </template>
         </el-table-column>
-        <!--        <el-table-column fixed="right" label="操作" width="180">-->
-        <!--          <template #default="scope">-->
-        <!--            <el-upload-->
-        <!--              :show-file-list="false"-->
-        <!--              :before-upload="handleBeforeUpload"-->
-        <!--              :http-request="(option) => handleUpload(scope.row.id, option.file)"-->
-        <!--            >-->
-        <!--              <el-button type="primary" icon="Upload"> 上传知识库文件 </el-button>-->
-        <!--            </el-upload>-->
-        <!--          </template>-->
-        <!--        </el-table-column>-->
       </template>
     </art-table>
-
-    <el-dialog v-model="visible" title="新增智能体" width="600px" align-center>
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="150px">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="form.name" />
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" />
-        </el-form-item>
-        <el-form-item label="模型ID" prop="modelID">
-          <el-select
-            v-model="form.modelID"
-            placeholder="请选择模型"
-            filterable
-            @visible-change="onModelSelectVisible"
-          >
-            <el-option
-              v-for="model in modelOptions"
-              :key="model.id"
-              :label="model.model"
-              :value="model.id"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="系统提示词" prop="systemPrompt">
-          <el-input v-model="form.systemPrompt" type="textarea" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确认</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, reactive, onMounted } from 'vue'
   import { FormInstance } from 'element-plus'
-  import { AIAgentService } from '@/api/aiAgentApi'
-  import { AIAgent } from '@/types/aiAgent'
-  import { AIModelService } from '@/api/aiModelApi'
-  import { KnowledgeBaseFileService } from '@/api/knowledgeBaseFile'
-  import { KnowledgeBaseFile } from '@/types/knowledgeBaseFile'
+  import { KnowledgeBaseService } from '@/api/knowledgeBaseFile'
   import { filterEmptyParams } from '@/utils/utils'
-
-  const visible = ref(false)
+  import { KnowledgeBaseFile } from '@/types/knowledgeBase'
 
   onMounted(async () => {
     await fetchKnowledgeBaseFileTableData()
   })
-
-  const modelOptions = ref<{ id: string; model: string }[]>([])
-
-  const onModelSelectVisible = async (visible: boolean) => {
-    if (visible) {
-      const res = await AIModelService.getSimpleModelList()
-      modelOptions.value = res.data
-    }
-  }
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B'
@@ -180,38 +121,6 @@
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const rules = {
-    name: [{ required: true, message: '请输入智能体名称', trigger: 'blur' }],
-    modelID: [{ required: true, message: '请输入模型ID', trigger: 'blur' }],
-    systemPrompt: [{ required: true, message: '请输入系统提示词', trigger: 'blur' }]
-  }
-
-  const form = ref<AIAgent>({
-    name: '',
-    description: '',
-    modelID: '',
-    systemPrompt: ''
-  })
-
-  const resetForm = () => {
-    Object.assign(form.value, {
-      name: '',
-      description: '',
-      modelID: '',
-      systemPrompt: ''
-    })
-  }
-
-  const formRef = ref<FormInstance>()
-  const submitForm = async () => {
-    await formRef.value?.validate()
-    await AIAgentService.create({ data: JSON.stringify(form.value) })
-    ElMessage.success('智能体创建成功')
-    visible.value = false
-    await fetchKnowledgeBaseFileTableData()
-    resetForm()
   }
 
   const KnowledgeBaseFileTableData = ref<KnowledgeBaseFile[]>([])
@@ -224,9 +133,8 @@
       page: KnowledgeBaseFileCurrentPage.value,
       size: KnowledgeBaseFilePageSize.value,
       ...filterEmptyParams(searchKnowledgeBaseFileForm)
-      // name: searchAgentForm.name || undefined
     }
-    const res = await KnowledgeBaseFileService.getPage({ data: JSON.stringify(params) })
+    const res = await KnowledgeBaseService.getFilePage({ data: JSON.stringify(params) })
     KnowledgeBaseFileTableData.value = res.data.data
     KnowledgeBaseFileTotal.value = res.data.total
   }
@@ -248,6 +156,15 @@
     create_user: '',
     time_range: ''
   })
+
+  const resetForm = () => {
+    Object.assign(searchKnowledgeBaseFileForm, {
+      name: '',
+      description: '',
+      modelID: '',
+      systemPrompt: ''
+    })
+  }
 
   const searchKnowledgeBaseFile = () => {
     KnowledgeBaseFileCurrentPage.value = 1
@@ -287,7 +204,7 @@
   const handleUpload = async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-    const res = await KnowledgeBaseFileService.uploadKnowledgeBaseFile(formData)
+    const res = await KnowledgeBaseService.uploadKnowledgeBaseFile(formData)
     if (res.code === 200) {
       ElMessage.success('文件上传成功')
     } else {
