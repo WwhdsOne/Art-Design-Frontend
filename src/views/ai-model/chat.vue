@@ -45,7 +45,6 @@
             clearable
             filterable
             style="width: 150px; margin-top: 5px; margin-bottom: 5px"
-            @change="onModelSelectChange"
           >
             <el-option
               v-for="model in models"
@@ -66,20 +65,19 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item prop="agent">
+        <el-form-item prop="KnowledgeBase">
           <el-select
-            v-model="selectedAgentId"
-            placeholder="请选择智能体"
+            v-model="selectedKnowledgeBaseId"
+            placeholder="请选择知识库"
             clearable
             filterable
             style="width: 150px; margin-bottom: 5px"
-            @change="onAgentSelectChange"
           >
             <el-option
-              v-for="agent in agents"
-              :key="agent.id"
-              :label="agent.name"
-              :value="agent.id"
+              v-for="KnowledgeBase in knowledgeBases"
+              :key="KnowledgeBase.id"
+              :label="KnowledgeBase.name"
+              :value="KnowledgeBase.id"
             />
           </el-select>
         </el-form-item>
@@ -119,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, nextTick, onMounted } from 'vue'
+  import { computed, nextTick, onMounted, ref } from 'vue'
   import { useUserStore } from '@/store/modules/user.js'
   import { AIModelService } from '@/api/aiModelApi.js'
   import 'github-markdown-css/github-markdown.css'
@@ -127,7 +125,7 @@
   import Prism from 'prismjs'
   import { useMarkdown } from '@/utils/markdown'
   import DOMPurify from 'dompurify'
-  import { AIAgentService } from '@/api/aiAgentApi'
+  import { KnowledgeBaseService } from '@/api/knowledgeBaseFile'
 
   const md = useMarkdown()
 
@@ -140,18 +138,11 @@
 
   onMounted(() => {
     fetchModelList()
-    fetchAgentList()
+    fetchKnowledgeBases()
   })
 
-  const selectedAgentId = ref()
+  const selectedKnowledgeBaseId = ref()
   const selectedModelId = ref()
-
-  const onModelSelectChange = () => {
-    selectedAgentId.value = undefined // 清空智能体
-  }
-  const onAgentSelectChange = () => {
-    selectedModelId.value = undefined // 清空模型
-  }
 
   // 可选模型列表，从后端接口获取
   const models = ref<SimpleAIModel[]>([])
@@ -165,13 +156,13 @@
   }
 
   // 可选智能体列表，从后端接口获取
-  const agents = ref<{ id: number; name: string }[]>([])
+  const knowledgeBases = ref<{ id: number; name: string }[]>([])
 
-  const fetchAgentList = async () => {
+  const fetchKnowledgeBases = async () => {
     // 替换为实际接口
-    AIAgentService.getSimpleAgentList().then((res) => {
+    KnowledgeBaseService.getSimpleList().then((res) => {
       if (res.code === 200) {
-        agents.value = res.data
+        knowledgeBases.value = res.data
       }
     })
   }
@@ -333,8 +324,7 @@
     const input = userInput.value.trim()
     if (!input) return
 
-    const question = input
-    messages.value.push({ role: 'user', content: question })
+    messages.value.push({ role: 'user', content: input })
     userInput.value = ''
 
     const { accessToken } = useUserStore()
@@ -344,20 +334,12 @@
       role: msg.role,
       content: msg.content
     }))
-
-    if (selectedAgentId.value) {
-      // 智能体接口
-      fetchStream('/api/ai/agent/chat-completion', accessToken, {
-        messages: history,
-        id: selectedAgentId.value
-      })
-    } else {
-      // 模型接口
-      fetchStream('/api/ai/model/chat-completion', accessToken, {
-        messages: history,
-        id: selectedModelId.value
-      })
-    }
+    // 模型接口
+    fetchStream('/api/ai/model/chat-completion', accessToken, {
+      messages: history,
+      id: selectedModelId.value,
+      knowledge_base_id: selectedKnowledgeBaseId.value
+    })
   }
 
   // function loadSession(session) {

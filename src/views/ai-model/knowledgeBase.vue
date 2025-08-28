@@ -1,7 +1,7 @@
 <template>
   <div class="page-content">
     <el-row :gutter="20" style="margin-left: 15px">
-      <el-button @click="showModel">创建知识库</el-button>
+      <el-button @click="showModel(null)">创建知识库</el-button>
     </el-row>
 
     <table-bar
@@ -24,9 +24,11 @@
       <template #default>
         <el-table-column label="知识库名称" prop="name" v-if="Columns[0].show" />
         <el-table-column label="描述" prop="description" v-if="Columns[1].show" />
+        <el-table-column label="创建时间" prop="created_at" v-if="Columns[2].show" />
+        <el-table-column label="更新时间" prop="updated_at" v-if="Columns[3].show" />
         <el-table-column fixed="right" label="操作" width="180">
           <template #default="scope">
-            <button-table type="edit" />
+            <button-table type="edit" @click="showModel(scope.row)" />
             <button-table type="delete" @click="deleteKnowledgeBase(scope.row)" />
           </template>
         </el-table-column>
@@ -86,11 +88,16 @@
   import { KnowledgeBaseService } from '@/api/knowledgeBaseFile'
   import { KnowledgeBase, KnowledgeBaseFile } from '@/types/knowledgeBase'
 
-  const visible = ref(false)
-  const showModel = () => (visible.value = true)
-
   const rules = {
-    name: [{ required: true, message: '请输入智能体名称', trigger: 'blur' }]
+    name: [
+      { required: true, message: '请输入知识库名称', trigger: 'blur' },
+      { min: 1, max: 100, message: '名称长度应在 1 到 100 个字符之间', trigger: 'blur' }
+    ],
+    description: [{ max: 500, message: '描述长度不能超过 500 个字符', trigger: 'blur' }],
+    files: [
+      // 如果你希望至少要选择 1 个文件，可以加 required
+      // { required: true, message: '请选择至少一个文件', trigger: 'change' }
+    ]
   }
 
   const form = ref<KnowledgeBase>({
@@ -109,16 +116,49 @@
     }
   }
 
+  const visible = ref(false)
+
+  const mode = ref<'create' | 'edit'>('create')
+
+  const fileOptions = ref<KnowledgeBaseFile[]>([])
+
+  const showModel = async (row: KnowledgeBase | null) => {
+    visible.value = true
+    if (row !== null) {
+      mode.value = 'edit'
+      form.value = { ...row, files: [] } // 先清空，避免上次残留
+
+      // 向后端请求该知识库已关联的文件
+      const files = await KnowledgeBaseService.getFileListByKnowledgeBaseID(row.id)
+
+      form.value.files = files.data
+      fileOptions.value = files.data // 不再合并，而是直接覆盖
+    } else {
+      resetForm()
+      mode.value = 'create'
+      fileOptions.value = [] // 新建模式下清空下拉选项
+    }
+  }
+
   const formRef = ref<FormInstance>()
+
   const submitForm = async () => {
     await formRef.value?.validate()
     const param = {
+      id: form.value.id,
       name: form.value.name,
       description: form.value.description,
-      file_ids: form.value.files.map((file) => file.id)
+      files: form.value.files
     }
-    await KnowledgeBaseService.create({ data: JSON.stringify(param) })
-    ElMessage.success('知识库创建成功')
+
+    if (mode.value === 'create') {
+      await KnowledgeBaseService.create({ data: JSON.stringify(param) })
+      ElMessage.success('知识库创建成功')
+    } else {
+      await KnowledgeBaseService.update({ data: JSON.stringify(param) })
+      ElMessage.success('知识库更新成功')
+    }
+
     visible.value = false
     await fetchTableData()
     resetForm()
@@ -151,12 +191,13 @@
 
   const Columns = reactive([
     { name: '名称', key: 'name', show: true },
-    { name: '描述', key: 'description', show: true }
+    { name: '描述', key: 'description', show: true },
+    { name: '创建时间', key: 'created_at', show: true },
+    { name: '更新时间', key: 'updated_at', show: true }
   ])
 
   onMounted(fetchTableData)
 
-  const fileOptions = ref<KnowledgeBaseFile[]>([])
   const loading = ref(false)
   const knowledgeBaseFilePage = ref(1)
   const knowledgeBaseFilePageSize = ref(20)
@@ -183,7 +224,6 @@
       const res = await KnowledgeBaseService.getFilePage({ data: JSON.stringify(params) })
       if (res.data.data && res.data.data.length > 0) {
         fileOptions.value.push(...res.data.data)
-        console.log('fileOptions', res.data.data)
         knowledgeBaseFilePage.value++
       } else {
         hasMore.value = false
@@ -191,7 +231,6 @@
     } finally {
       loading.value = false
     }
-    console.log('fileOptions', fileOptions.value)
   }
 
   // 监听下拉滚动

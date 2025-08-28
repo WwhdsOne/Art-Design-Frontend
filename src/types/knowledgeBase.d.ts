@@ -8,15 +8,9 @@ export interface KnowledgeBaseFile {
   created_at: string // 创建时间（ISO 字符串）
 }
 
-// knowledgeBase.d.ts
-interface SimpleKnowledgeBaseFile {
-  id: string
-  filename: string
-}
-
 export interface KnowledgeBase {
   id: string // 主键ID（后端返回 string，避免大整数精度丢失）
   name: string // 知识库名称
   description: string
-  files: SimpleKnowledgeBaseFile[]
+  files: KnowledgeBaseFile[]
 }

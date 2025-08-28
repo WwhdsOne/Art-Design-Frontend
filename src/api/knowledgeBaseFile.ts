@@ -40,4 +40,24 @@ export class KnowledgeBaseService {
       url: `/api/knowledgeBase/delete/${id}`
     })
   }
+
+  // 根据知识库ID获取知识库文件列表
+  static getFileListByKnowledgeBaseID(id: string): Promise<PaginationResult<any>> {
+    return request.get({
+      url: `/api/knowledgeBase/${id}/files`
+    })
+  }
+
+  static getSimpleList(): Promise<BaseResult> {
+    return request.get({
+      url: `/api/knowledgeBase/simpleList`
+    })
+  }
+
+  static update(options: { data: string }): Promise<BaseResult> {
+    return request.post({
+      url: '/api/knowledgeBase/update',
+      data: options.data
+    })
+  }
 }
