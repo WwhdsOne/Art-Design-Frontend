@@ -2,17 +2,22 @@
   <div class="chat-wrapper">
     <!-- 左侧历史会话栏 -->
     <aside class="chat-history">
+      <!-- 新聊天按钮 -->
+      <div class="new-session" @click="startNewSession">
+        <span class="icon">&#xe626;</span> 新聊天
+      </div>
+
       <div class="history-section" v-for="(group, label) in groupedSessions" :key="label">
         <h4>{{ label }}</h4>
         <ul>
-          <!--          <li-->
-          <!--            v-for="session in group"-->
-          <!--            :key="session.id"-->
-          <!--            @click="loadSession(session)"-->
-          <!--            :class="{ active: currentSession?.id === session.id }"-->
-          <!--          >-->
-          <!--            {{ session.title || '未命名对话' }}-->
-          <!--          </li>-->
+          <li
+            v-for="session in group"
+            :key="session.id"
+            @click="loadSession(session)"
+            :class="{ active: currentSession?.id === session.id }"
+          >
+            {{ session.title }}
+          </li>
         </ul>
       </div>
     </aside>
@@ -126,19 +131,20 @@
   import { useMarkdown } from '@/utils/markdown'
   import DOMPurify from 'dompurify'
   import { KnowledgeBaseService } from '@/api/knowledgeBaseFile'
+  import { Conversation } from '@/types/conversation'
 
   const md = useMarkdown()
 
   const userInput = ref('')
-  const messages = ref([{ role: 'system', content: '欢迎使用 Chat！' }])
+  const messages = ref<AIMessages[]>([])
   const currentAiMessage = ref<AIMessages | null>(null)
+  const currentSession = ref<Conversation | null>(null)
   const chatWindow = ref<HTMLDivElement>()
-
-  // const currentSession = ref(null)
 
   onMounted(() => {
     fetchModelList()
     fetchKnowledgeBases()
+    fetchHistoryConversations()
   })
 
   const selectedKnowledgeBaseId = ref()
@@ -166,6 +172,52 @@
       }
     })
   }
+
+  // 模拟历史会话数据（真实项目应从 API 获取）
+  const allSessions = ref<Conversation[]>([])
+
+  const startNewSession = () => {
+    currentSession.value = null // 重置当前会话
+    // 如果有聊天内容，也可以同时清空
+    messages.value = []
+  }
+
+  const fetchHistoryConversations = () => {
+    AIModelService.getHistoryConversation().then((res) => {
+      if (res.code === 200) {
+        allSessions.value = res.data
+      }
+    })
+  }
+
+  // 根据时间分组
+  const groupedSessions = computed(() => {
+    const groups: Record<string, typeof allSessions.value> = {}
+
+    // 分组
+    allSessions.value.forEach((s) => {
+      const date = new Date(s.created_at) // 后端字段 create_at
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1 // 月份 0-11
+      const key = `${year}-${month.toString().padStart(2, '0')}`
+
+      if (!groups[key]) {
+        groups[key] = []
+      }
+      groups[key].push(s)
+    })
+
+    // 排序月份
+    const sortedKeys = Object.keys(groups).sort((a, b) => (a < b ? 1 : -1))
+
+    // 构造有序对象
+    const sortedGroups: Record<string, typeof allSessions.value> = {}
+    sortedKeys.forEach((key) => {
+      sortedGroups[key] = groups[key]
+    })
+
+    return sortedGroups
+  })
 
   const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
@@ -214,36 +266,13 @@
     })
   }
 
-  // 模拟历史会话数据（真实项目应从 API 获取）
-  const allSessions = ref([
-    { id: 's1', title: '今天的对话', timestamp: new Date() },
-    { id: 's2', title: '三天前对话', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-    { id: 's3', title: '十天前对话', timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
-    { id: 's4', title: '一月前对话', timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-  ])
-
-  const groupedSessions = computed(() => {
-    const now = Date.now()
-    return {
-      今天: allSessions.value.filter((s) => now - s.timestamp.getTime() < 24 * 60 * 60 * 1000),
-      '7天内': allSessions.value.filter(
-        (s) =>
-          now - s.timestamp.getTime() >= 24 * 60 * 60 * 1000 &&
-          now - s.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000
-      ),
-      '30天内': allSessions.value.filter(
-        (s) =>
-          now - s.timestamp.getTime() >= 7 * 24 * 60 * 60 * 1000 &&
-          now - s.timestamp.getTime() < 30 * 24 * 60 * 60 * 1000
-      ),
-      更早: allSessions.value.filter((s) => now - s.timestamp.getTime() >= 30 * 24 * 60 * 60 * 1000)
-    }
-  })
-
   const fetchStream = async (url: string, token: string, data: any) => {
+    // 先占位一个 AI 消息
     const aiMessage = { role: 'assistant', content: '' }
     messages.value.push(aiMessage)
     currentAiMessage.value = aiMessage
+
+    // let isNewConversation = false
 
     const response = await fetch(url, {
       method: 'POST',
@@ -271,23 +300,39 @@
       buffer += decoder.decode(value, { stream: true })
 
       // 按双换行分割完整消息
-      let messages = buffer.split('\n\n')
-      buffer = messages.pop() || '' // 留下最后可能未完整的数据
+      let messagesChunk = buffer.split('\n\n')
+      buffer = messagesChunk.pop() || '' // 留下最后可能未完整的数据
 
-      for (const msg of messages) {
+      for (const msg of messagesChunk) {
         const lines = msg.split('\n')
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const jsonStr = line.replace(/^data:\s?/, '') // 提取 JSON 字符串
+            const jsonStr = line.replace(/^data:\s?/, '')
             if (jsonStr && jsonStr !== '[DONE]') {
               try {
                 const parsed = JSON.parse(jsonStr)
+
+                // 正常 AI 内容
                 const content = parsed.v || ''
                 if (content) {
-                  // 换行前加两个空格，方便 Markdown 渲染换行
                   rawContent += content.replace(/\n/g, '  \n')
                   currentAiMessage.value.content = DOMPurify.sanitize(md.render(rawContent))
                   scrollToBottom()
+                }
+                // 第一条消息可能是 meta 类型，返回 conversationID
+                else if (!currentSession.value?.id && parsed.id) {
+                  // 创建新会话对象
+                  const newSession: Conversation = {
+                    id: parsed.id,
+                    title: parsed.title,
+                    created_at: parsed.created_at || new Date().toISOString()
+                  }
+
+                  // 插入到会话列表最前面
+                  allSessions.value.unshift(newSession)
+
+                  // 设置为当前会话
+                  currentSession.value = newSession
                 }
               } catch (e) {
                 console.error('JSON 解析失败:', e)
@@ -338,15 +383,21 @@
     fetchStream('/api/ai/model/chat-completion', accessToken, {
       messages: history,
       id: selectedModelId.value,
-      knowledge_base_id: selectedKnowledgeBaseId.value
+      knowledge_base_id: selectedKnowledgeBaseId.value,
+      conversation_id: currentSession.value?.id
     })
   }
 
-  // function loadSession(session) {
-  //   currentSession.value = session
-  //   // 在真实项目中：从后端拉取该 session 的 message 列表
-  //   messages.value = [{ role: 'system', content: `已加载对话：${session.title}` }]
-  // }
+  function loadSession(session: Conversation) {
+    currentSession.value = session
+    AIModelService.getHistoryConversationMessages(session.id).then((res) => {
+      messages.value = res.data.map((msg) => ({
+        ...msg,
+        content: msg.role === 'assistant' ? md.render(msg.content) : msg.content
+      }))
+      scrollToBottom()
+    })
+  }
 </script>
 
 <style>
@@ -358,28 +409,43 @@
   }
 
   .chat-history {
-    width: 150px;
+    width: 200px;
     padding: 1rem;
     overflow-y: auto;
     background-color: var(--art-main-bg-color);
     border-right: 1px solid #ddd;
   }
 
+  /* 分组标题 */
   .chat-history h4 {
     margin: 1rem 0 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 
-  .chat-history ul {
-    padding: 0;
-    list-style: none;
-  }
-
+  /* 列表和列表项统一设置 */
+  .chat-history ul,
   .chat-history li {
-    padding: 0.3rem 0.5rem;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    list-style: none !important; /* 去掉圆点 */
+  }
+
+  /* 列表项样式 */
+  .chat-history li {
+    display: flex; /* 支持垂直居中 */
+    align-items: center;
+    height: 40px; /* 固定高度，每行一样高 */
+    padding: 0 0.5rem; /* 水平内边距 */
+    line-height: 40px; /* 垂直居中文字 */
     cursor: pointer;
     border-radius: 4px;
+    transition: background-color 0.2s;
   }
 
+  /* 鼠标悬停和激活状态 */
   .chat-history li.active,
   .chat-history li:hover {
     background-color: var(--art-text-gray-300);
@@ -525,5 +591,28 @@
 
   ol {
     list-style-type: decimal; /* 数字 */
+  }
+
+  .new-session {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    color: var(--art-text-gray-500);
+    cursor: pointer;
+    border-radius: 4px;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+
+  .new-session .icon {
+    margin-right: 0.3rem;
+    font-family: iconfont-sys, serif; /* Project id 3682552 */
+    font-size: 16px;
+  }
+
+  .new-session:hover {
+    color: var(--art-text-gray-900);
+    background-color: var(--art-main-bg-color);
   }
 </style>

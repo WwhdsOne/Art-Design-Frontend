@@ -154,16 +154,17 @@
     border-radius: 5px !important;
 
     &::after {
+      content: '';
+      position: absolute;
       width: 4px;
       height: 8px;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 4px;
-      margin: auto;
       border: 2px solid var(--el-checkbox-checked-icon-color);
       border-left: 0;
       border-top: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg); // 旋转对勾
+      box-sizing: border-box;
     }
   }
 }

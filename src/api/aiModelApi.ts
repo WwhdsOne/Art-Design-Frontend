@@ -1,5 +1,6 @@
 import request from '@/utils/http'
 import { BaseResult, PaginationResult } from '@/types/axios'
+import { AIMessages } from '@/types/aiModel'
 
 export class AIModelService {
   // 获取模型分页 - 直接接收 JSON 字符串
@@ -10,11 +11,17 @@ export class AIModelService {
     })
   }
 
-  // 对话
-  static chatCompletionStream(options: { data: string }): Promise<any> {
-    return request.post({
-      url: '/api/ai/model/chat-completion',
-      data: options.data
+  // 获取历史对话记录
+  static getHistoryConversation(): Promise<BaseResult> {
+    return request.get({
+      url: '/api/ai/conversation/history'
+    })
+  }
+
+  // 根据历史会话ID获取聊天记录
+  static getHistoryConversationMessages(id: string): Promise<BaseResult<AIMessages[]>> {
+    return request.get({
+      url: `/api/ai/conversation/${id}/messages`
     })
   }
 
