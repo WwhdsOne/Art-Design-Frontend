@@ -21,6 +21,7 @@ export interface SimpleAIModel {
   id: string
   model: string
   icon: string
+  model_type: string
 }
 
 export interface AIMessages {

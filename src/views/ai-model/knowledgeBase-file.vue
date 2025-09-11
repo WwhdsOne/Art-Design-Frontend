@@ -207,6 +207,7 @@
     const res = await KnowledgeBaseService.uploadKnowledgeBaseFile(formData)
     if (res.code === 200) {
       ElMessage.success('文件上传成功')
+      await fetchKnowledgeBaseFileTableData()
     } else {
       ElMessage.error(res.message || '上传失败')
     }

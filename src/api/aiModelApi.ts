@@ -47,4 +47,12 @@ export class AIModelService {
       data: formData
     })
   }
+
+  // 上传对话文件
+  static uploadChatFile(formData: FormData): Promise<BaseResult> {
+    return request.post({
+      url: '/api/ai/model/uploadChatFile',
+      data: formData
+    })
+  }
 }

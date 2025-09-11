@@ -408,7 +408,7 @@
   const modelTypeOptions = [
     { label: '对话模型', value: 'chat' },
     { label: '向量模型', value: 'embedding' },
-    { label: '多模态模型', value: 'multimodal' },
+    { label: '多模态模型', value: 'multimode' },
     { label: '精排模型', value: 'rerank' }
   ]
 

@@ -49,7 +49,7 @@
             placeholder="请选择模型"
             clearable
             filterable
-            style="width: 150px; margin-top: 5px; margin-bottom: 5px"
+            style="width: 220px; margin-top: 5px; margin-bottom: 5px"
           >
             <el-option
               v-for="model in models"
@@ -57,13 +57,23 @@
               :label="model.model"
               :value="model.id"
             >
-              <div style="display: flex; align-items: center; justify-content: space-between">
-                <span>{{ model.model }}</span>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  width: 100%;
+                "
+              >
+                <div style="display: flex; gap: 6px; align-items: center">
+                  <span>{{ model.model }}</span>
+                  <el-tag size="small" type="info">{{ model.model_type }}</el-tag>
+                </div>
                 <img
                   v-if="model.icon"
                   :src="model.icon"
                   alt="icon"
-                  style="width: 16px; height: 16px; margin-left: 8px"
+                  style="width: 16px; height: 16px"
                 />
               </div>
             </el-option>
@@ -89,6 +99,15 @@
       </div>
 
       <div class="chat-input-wrapper">
+        <!-- 图片预览区 -->
+        <div v-if="uploadedImages.length" class="chat-image-preview">
+          <div v-for="(img, index) in uploadedImages" :key="index" class="preview-item">
+            <img :src="img" alt="preview" class="preview-img" />
+            <el-icon class="remove-icon" @click="removeImage(index)">
+              <Close />
+            </el-icon>
+          </div>
+        </div>
         <!-- 输入框 -->
 
         <textarea
@@ -105,10 +124,25 @@
         <div class="chat-toolbar">
           <!-- 左下角：工具todo -->
 
-          <div class="chat-tools">
-            <!--            <el-button text icon="el-icon-lightning">推理</el-button>-->
-            <!--            <el-button text icon="el-icon-time">沉思</el-button>-->
-            <!--            <el-button text icon="el-icon-connection">联网</el-button>-->
+          <div class="chat-tools" style="display: flex; gap: 10px">
+            <!-- 仅在选中的模型支持 multimode 时显示 -->
+            <el-button text>
+              <el-upload
+                :show-file-list="false"
+                :before-upload="handleBeforeUpload"
+                :http-request="(option) => handleUpload(option.file)"
+              >
+                <el-button type="primary" icon="Upload"> 上传图片 </el-button>
+              </el-upload>
+            </el-button>
+
+            <!--            <el-button text @click="onThink">-->
+            <!--              <el-icon><Timer /></el-icon> 沉思-->
+            <!--            </el-button>-->
+
+            <!--            <el-button text @click="onConnect">-->
+            <!--              <el-icon><Link /></el-icon> 联网-->
+            <!--            </el-button>-->
           </div>
 
           <!-- 右下角：发送 -->
@@ -132,6 +166,7 @@
   import DOMPurify from 'dompurify'
   import { KnowledgeBaseService } from '@/api/knowledgeBaseFile'
   import { Conversation } from '@/types/conversation'
+  import { Close } from '@element-plus/icons-vue'
 
   const md = useMarkdown()
 
@@ -140,6 +175,7 @@
   const currentAiMessage = ref<AIMessages | null>(null)
   const currentSession = ref<Conversation | null>(null)
   const chatWindow = ref<HTMLDivElement>()
+  const uploadedImages = ref<string[]>([])
 
   onMounted(() => {
     fetchModelList()
@@ -271,7 +307,8 @@
     const aiMessage = { role: 'assistant', content: '' }
     messages.value.push(aiMessage)
     currentAiMessage.value = aiMessage
-
+    // 清空预览区图片
+    uploadedImages.value = []
     // let isNewConversation = false
 
     const response = await fetch(url, {
@@ -379,12 +416,14 @@
       role: msg.role,
       content: msg.content
     }))
+    console.log('conversation', currentSession.value?.id)
     // 模型接口
     fetchStream('/api/ai/model/chat-completion', accessToken, {
       messages: history,
       id: selectedModelId.value,
       knowledge_base_id: selectedKnowledgeBaseId.value,
-      conversation_id: currentSession.value?.id
+      conversation_id: currentSession.value?.id,
+      files: uploadedImages.value
     })
   }
 
@@ -397,6 +436,48 @@
       }))
       scrollToBottom()
     })
+  }
+
+  // 上传前校验
+  const handleBeforeUpload = (file: File) => {
+    const isAllowedType = [
+      'image/jpeg', // jpg、jpeg
+      'image/png', // png
+      'image/gif', // gif
+      'image/webp', // webp
+      'image/bmp', // bmp
+      'image/svg+xml' // svg
+    ].includes(file.type)
+
+    const isLt10M = file.size / 1024 / 1024 < 10
+
+    if (!isAllowedType) {
+      ElMessage.error('仅支持上传 JPG、PNG、GIF、WEBP、BMP 或 SVG 图片')
+      return false
+    }
+
+    if (!isLt10M) {
+      ElMessage.error('上传图片大小不能超过 10MB')
+      return false
+    }
+    return true
+  }
+
+  // 自定义上传处理
+  const handleUpload = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await AIModelService.uploadChatFile(formData)
+    if (res.code === 200) {
+      ElMessage.success('文件上传成功')
+      uploadedImages.value.push(res.data)
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  }
+
+  const removeImage = (index: number) => {
+    uploadedImages.value.splice(index, 1)
   }
 </script>
 
@@ -614,5 +695,39 @@
   .new-session:hover {
     color: var(--art-text-gray-900);
     background-color: var(--art-main-bg-color);
+  }
+
+  .chat-image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 保证比例填充 */
+  }
+
+  .remove-icon {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    padding: 2px;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    background: rgb(0 0 0 / 50%);
+    border-radius: 50%;
   }
 </style>
