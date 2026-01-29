@@ -464,6 +464,7 @@
   }
 
   // 操作按钮事件（示例）
+  // todo 模型删除和模型信息更新
   // const editModel = (row: AIModel) => {
   //   ElMessage.info(`编辑模型: ${row.model}`)
   // }
