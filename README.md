@@ -1,88 +1,176 @@
-简体中文 | [English](./README.en.md)
+## 关于 Art Design Frontend
 
-## 关于 Art Design Pro
+Art Design Frontend 是一款现代化的前端管理系统，专注于提供优秀的用户体验和高效开发体验。基于 Vue 3 + TypeScript + Vite + Element Plus 技术栈，采用现代化的开发理念，提供美观、实用的前端界面，帮助开发者快速构建高质量的后台管理系统。
 
-作为一名开发者，我在多个项目中需要搭建后台管理系统，但发现传统系统在用户体验和视觉设计上不能完全满足需求。因此，我创建了 Art Design Pro，一款专注于用户体验和快速开发的开源后台管理解决方案。基于 ElementPlus 设计规范，进行了视觉上的精心优化，提供更美观、更实用的前端界面，帮助你轻松构建高质量的后台系统。
+## 项目特点
 
-## 演示图
-
-### 浅色主题
-
-![浅色主题](https://www.qiniu.lingchen.kim/art_design_pro_readme_cover1.png)
-
-![浅色主题](https://www.qiniu.lingchen.kim/art_design_pro_readme_cover2.png)
-
-### 暗黑主题
-
-![暗黑主题](https://www.qiniu.lingchen.kim/art_design_pro_readme_cover3.png)
-
-![暗黑主题](https://www.qiniu.lingchen.kim/art_design_pro_readme_cover4.png)
-
-## 特点
-
-- 使用最新技术栈
-- 内置常用业务组件模版
-- 提供多种主题模式，可以自定义主题
-- 漂亮的 UI设计、极致的用户体验和细节处理
-- 系统全面支持自定义设置，满足您的个性化需求
+- 现代化技术栈：Vue 3 + TypeScript + Vite + Element Plus
+- AI 智能集成：支持 AI 模型、智能代理、知识库管理等功能
+- 丰富的组件库：内置多种业务组件模板和常用工具
+- 多种主题模式：支持浅色、暗黑、系统主题，可自定义主题
+- 完善的权限管理：路由级别鉴权、侧边栏菜单鉴权、鉴权指令
+- 优秀的代码规范：集成 ESLint、Prettier、Stylelint、Husky 等工具
+- 移动端适配：响应式设计，支持多终端访问
 
 ## 技术栈
 
-- 开发框架：Vue3、TypeScript、Vite、Element-Plus
-- 代码规范：Eslint、Prettier、Stylelint、Husky、Lint-staged、cz-git
+### 核心框架
 
-## 功能
+- **开发框架**：Vue 3、TypeScript、Vite、Element Plus
+- **状态管理**：Pinia
+- **路由管理**：Vue Router
+- **UI 组件库**：Element Plus
 
-- 丰富主题切换
-- 全局搜索
-- 锁屏
-- 多标签页
-- 全局面包屑
-- 多语言
-- 图标库
+### 工具库
+
+- **网络请求**：Axios
+- **图表可视化**：ECharts
+- **富文本编辑器**：WangEditor
+- **Markdown 渲染**：Markdown-it、Prism.js
+- **工具函数**：Day.js、crypto-js、mitt
+
+### 代码规范
+
+- **代码检查**：ESLint、Prettier、Stylelint
+- **提交规范**：Commitizen、cz-git
+- **Git Hooks**：Husky、lint-staged
+
+## 主要功能
+
+### AI 模块
+
+- AI 对话聊天
+- AI 智能代理
+- 知识库管理
+- AI 模型配置
+- 提供商管理
+
+### 系统管理
+
+- 用户管理
+- 角色管理
+- 菜单管理
+- API 管理
+- 操作日志
+
+### 仪表盘
+
+- 电商数据统计
+- 控制台概览
+- 数据分析看板
+
+### 工具组件
+
 - 富文本编辑器
-- Echarts 图表
-- Utils工具包
-- 网络异常处理
-- 路由级别鉴权
-- 侧边栏菜单鉴权
-- 鉴权指令
-- 移动端适配
-- 优秀的持久化存储方案
-- 本地数据存储校验
-- 代码提交校验与格式化
-- 代码提交规范化
+- 视频播放器
+- Excel 导入导出
+- 二维码生成
+- 图片裁剪
+- 拖拽排序
+- 文字滚动
+- 水印功能
+- 图标选择器
 
-## 兼容性
+### 基础功能
 
-- 支持 Chrome、Safari、Firefox 等现代主流浏览器。
+- 登录注册
+- 忘记密码
+- 用户中心
+- 多标签页
+- 全局搜索
+- 全局面包屑
+- 锁屏功能
+- 主题切换
+- 多语言支持
 
-## 安装运行
+### 特色功能
+
+- MNIST 数字识别
+- 内联页面(Iframe)
+- 更新日志
+- 403/404/500 异常页面
+
+## 快速开始
+
+### 安装依赖
 
 ```bash
-# 安装依赖
+# 使用 pnpm 安装（推荐）
 pnpm install
 
-# 如果 pnpm install 安装失败，尝试使用下面的命令安装依赖
+# 如果安装失败，尝试跳过脚本
 pnpm install --ignore-scripts
-
-# 本地开发环境启动
-pnpm dev
-
-# 生产环境打包
-pnpm build
 ```
 
-## 技术支持
+### 本地开发
 
-QQ群：<a href="https://qm.qq.com/cgi-bin/qm/qr?k=Gg6yzZLFaNgmRhK0T5Qcjf7-XcAFWWXm&jump_from=webapi&authKey=YpRKVJQyFKYbGTiKw0GJ/YQXnNF+GdXNZC5beQQqnGZTvuLlXoMO7nw5fNXvmVhA">821834289</a>（点击链接加入群聊）
+```bash
+# 启动开发服务器
+pnpm dev
+```
 
-## Star History
+### 生产构建
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Daymychen/art-design-pro&type=Date)](https://www.star-history.com/#Daymychen/art-design-pro&Date)
+```bash
+# 构建生产版本
+pnpm build
 
-## 捐赠
+# 预览生产构建
+pnpm serve
+```
 
-如果我的项目对你有所帮助，欢迎捐赠支持！你的支持将用于购买 ChatGPT、Cursor 等工具，以提升开发效率，让项目变得更好。感谢你的鼓励与支持！
+### 代码规范
 
-![捐赠二维码](https://www.qiniu.lingchen.kim/%E7%BB%84%202%402x%202.png)
+```bash
+# 运行 ESLint 检查
+pnpm lint
+
+# 自动修复代码
+pnpm fix
+
+# 运行 Prettier 格式化
+pnpm lint:prettier
+
+# 运行 Stylelint 检查
+pnpm lint:stylelint
+
+# 提交代码
+pnpm commit
+```
+
+## 项目结构
+
+```
+art-design-frontend/
+├── src/
+│   ├── assets/        # 静态资源
+│   ├── components/    # 公共组件
+│   ├── plugins/       # 插件配置
+│   ├── router/        # 路由配置
+│   ├── store/         # 状态管理
+│   ├── types/         # TypeScript 类型定义
+│   ├── utils/         # 工具函数
+│   └── views/         # 页面视图
+├── public/            # 公共静态资源
+├── package.json       # 项目配置
+└── vite.config.ts     # Vite 配置
+```
+
+## 浏览器支持
+
+- Chrome (最新版本)
+- Safari (最新版本)
+- Firefox (最新版本)
+- Edge (最新版本)
+
+## 相关项目
+
+- **后端项目**：[Art Design Backend](https://github.com/WwhdsOne/Art-Design-Backend)
+
+## 许可证
+
+MIT License
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request 来帮助改进项目。
