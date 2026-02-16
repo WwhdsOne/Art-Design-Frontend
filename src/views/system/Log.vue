@@ -1,181 +1,228 @@
 <template>
   <div class="page-content">
-    <el-row :gutter="15">
-      <el-col :xs="19" :sm="12" :lg="6">
-        <el-input placeholder="请输入用户名搜索"></el-input>
-      </el-col>
-      <el-col :xs="4" :sm="12" :lg="4">
-        <el-button v-ripple>搜索</el-button>
-      </el-col>
-    </el-row>
+    <table-bar
+      :showTop="false"
+      @search="search"
+      @reset="resetForm(searchFormRef)"
+      @changeColumn="changeColumn"
+      :columns="columns"
+    >
+      <template #top>
+        <el-form :model="searchForm" ref="searchFormRef" label-width="90px">
+          <el-row :gutter="20">
+            <form-input label="操作人ID" prop="operator_id" v-model="searchForm.operator_id" />
+            <form-input label="请求路径" prop="path" v-model="searchForm.path" />
+            <form-select
+              label="请求方式"
+              prop="method"
+              v-model="searchForm.method"
+              :options="methodOptions"
+            />
+            <form-select
+              label="状态"
+              prop="status"
+              v-model="searchForm.status"
+              :options="statusOptions"
+            />
+          </el-row>
 
-    <art-table :data="logList">
-      <el-table-column label="用户名" prop="username" />
-      <el-table-column label="ip地址" prop="ip" />
-      <el-table-column label="浏览器" prop="browser" />
-      <el-table-column label="请求耗时" prop="status" />
-      <el-table-column label="日期" prop="create_time" />
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item label="时间区间">
+                <el-date-picker
+                  v-model="searchForm.timeRange"
+                  type="datetimerange"
+                  value-format="YYYY-MM-DDTHH:mm:ssZ"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="选择时间范围"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </template>
+    </table-bar>
+
+    <art-table
+      :data="tableData"
+      :currentPage="currentPage"
+      :pageSize="pageSize"
+      :total="total"
+      @update:currentPage="handleCurrentPageChange"
+      @update:pageSize="handlePageSizeChange"
+    >
+      <template #default>
+        <el-table-column label="ID" prop="id" min-width="220px" />
+        <el-table-column label="操作人ID" prop="operator_iD" min-width="220px" />
+        <el-table-column label="请求方式" prop="method" width="100" />
+        <el-table-column label="请求路径" prop="path" min-width="220" />
+        <el-table-column label="状态" prop="status" width="100">
+          <template #default="scope">
+            <el-tag :type="scope.row.status === 200 ? 'success' : 'danger'">
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="耗时(ms)" prop="latency" width="120" />
+        <el-table-column label="IP" prop="ip" min-width="150" />
+        <el-table-column label="浏览器" prop="browser" min-width="140" />
+        <el-table-column label="系统" prop="os" min-width="140" />
+        <el-table-column label="创建时间" prop="created_at" min-width="220px" sortable>
+          <template #default="scope">
+            <!-- 使用 dayjs 格式化 -->
+            {{ formatDate(scope.row.created_at) }}
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="详情" width="100">
+          <template #default="scope">
+            <el-button type="primary" link @click="openDetail(scope.row)">查看</el-button>
+          </template>
+        </el-table-column>
+      </template>
     </art-table>
+
+    <!-- 详情弹窗 -->
+    <el-dialog v-model="detailVisible" title="日志详情" width="60%">
+      <pre class="log-detail">{{ currentDetail }}</pre>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { reactive } from 'vue'
+  import { ref, reactive, onMounted } from 'vue'
+  import { FormInstance } from 'element-plus'
+  import { OperationLogService } from '@/api/operationLogApi'
+  import { formatDate } from '@/utils/format'
 
-  const logList = reactive([
-    {
-      username: '中小鱼',
-      sex: 0,
-      ip: '143.133.312.563',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '何小荷',
-      sex: 1,
-      ip: '131.133.313.424',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '誶誶淰',
-      sex: 0,
-      ip: '127.133.313.132',
-      browser: 'chrome',
-      status: 0,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '发呆草',
-      sex: 0,
-      ip: '143.133.313.456',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '甜筒',
-      sex: 1,
-      ip: '127.133.567.675',
-      browser: 'chrome',
-      status: 0,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '冷月呆呆',
-      sex: 1,
-      ip: '127.133.145.545',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '唐不苦',
-      sex: 1,
-      ip: '156.133.313.756',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '笑很甜',
-      sex: 0,
-      ip: '131.133.234.424',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '青隐篱',
-      sex: 0,
-      ip: '167.133.355.534',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '有你一生',
-      sex: 0,
-      ip: '234.133.545.533',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '中小鱼',
-      sex: 0,
-      ip: '245.567.313.890',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '何小荷',
-      sex: 1,
-      ip: '235.789.313.345',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '誶誶淰',
-      sex: 0,
-      ip: '214.133.313.543',
-      browser: 'chrome',
-      status: 0,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '发呆草',
-      sex: 0,
-      ip: '567.756.313.123',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '甜筒',
-      sex: 1,
-      ip: '564.133.313.645',
-      browser: 'chrome',
-      status: 0,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '冷月呆呆',
-      sex: 1,
-      ip: '587.133.313.422',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '唐不苦',
-      sex: 1,
-      ip: '571.133.313.423',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '甜筒',
-      sex: 1,
-      ip: '587.133.313.422',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    },
-    {
-      username: '青隐篱',
-      sex: 1,
-      ip: '571.133.313.423',
-      browser: 'chrome',
-      status: 1,
-      create_time: '2020-11-14'
-    }
+  /* ================= 基础分页数据 ================= */
+
+  const tableData = ref<any[]>([])
+  const currentPage = ref(1)
+  const pageSize = ref(10)
+  const total = ref(0)
+
+  /* ================= 查询表单 ================= */
+
+  const searchFormRef = ref<FormInstance>()
+
+  const searchForm = reactive({
+    operator_id: '',
+    path: '',
+    method: '',
+    status: '',
+    timeRange: [] as string[]
+  })
+
+  const methodOptions = [
+    { label: 'GET', value: 'GET' },
+    { label: 'POST', value: 'POST' },
+    { label: 'PUT', value: 'PUT' },
+    { label: 'DELETE', value: 'DELETE' }
+  ]
+
+  const statusOptions = [
+    { label: '成功', value: 200 },
+    { label: '失败', value: 500 }
+  ]
+
+  /* ================= 表格列控制 ================= */
+
+  const columns = reactive([
+    { name: 'ID', show: true },
+    { name: '操作人ID', show: true },
+    { name: '请求方式', show: true },
+    { name: '请求路径', show: true },
+    { name: '状态', show: true },
+    { name: '耗时', show: true },
+    { name: 'IP', show: true },
+    { name: '浏览器', show: true },
+    { name: '系统', show: true },
+    { name: '创建时间', show: true }
   ])
+
+  const changeColumn = (list: any) => {
+    columns.values = list
+  }
+
+  /* ================= 数据获取 ================= */
+
+  const fetchTableData = async () => {
+    const params = {
+      page: currentPage.value,
+      size: pageSize.value,
+      operator_id: Number(searchForm.operator_id) || 0,
+      path: searchForm.path,
+      method: searchForm.method,
+      status: Number(searchForm.status) || 0,
+      start_time: searchForm.timeRange?.[0] ?? null,
+      end_time: searchForm.timeRange?.[1] ?? null
+    }
+
+    const res = await OperationLogService.getOperationLogPage({
+      data: JSON.stringify({ ...params })
+    })
+    tableData.value = res.data.data
+    total.value = res.data.total
+    pageSize.value = res.data.size
+    currentPage.value = res.data.page
+  }
+
+  /* ================= 生命周期 ================= */
+
+  onMounted(() => {
+    fetchTableData()
+  })
+
+  /* ================= 分页 ================= */
+
+  const handleCurrentPageChange = (val: number) => {
+    currentPage.value = val
+    fetchTableData()
+  }
+
+  const handlePageSizeChange = (val: number) => {
+    pageSize.value = val
+    currentPage.value = 1
+    fetchTableData()
+  }
+
+  /* ================= 搜索 ================= */
+
+  const search = () => {
+    currentPage.value = 1
+    fetchTableData()
+  }
+
+  const resetForm = (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    formEl.resetFields()
+  }
+
+  /* ================= 详情 ================= */
+
+  const detailVisible = ref(false)
+  const currentDetail = ref('')
+
+  const openDetail = (row: any) => {
+    currentDetail.value = JSON.stringify(row, null, 2)
+    detailVisible.value = true
+  }
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped lang="scss">
+  .page-content {
+    width: 100%;
+    height: 100%;
+  }
+
+  .log-detail {
+    max-height: 500px;
+    padding: 16px;
+    overflow: auto;
+    background: #f6f8fa;
+    border-radius: 6px;
+  }
+</style>

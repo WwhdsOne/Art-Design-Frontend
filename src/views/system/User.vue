@@ -36,7 +36,7 @@
       @update:pageSize="handlePageSizeChange"
     >
       <template #default>
-        <el-table-column label="ID" prop="id" width="80px" v-if="columns[8].show" />
+        <el-table-column label="ID" prop="id" min-width="220px" v-if="columns[8].show" />
         <el-table-column
           label="用户名"
           prop="avatar"
@@ -60,7 +60,7 @@
           v-if="columns[6].show"
         >
         </el-table-column>
-        <el-table-column label="手机号" prop="phone" v-if="columns[1].show" />
+        <el-table-column label="手机号" prop="phone" min-width="220px" v-if="columns[1].show" />
         <el-table-column
           label="性别"
           prop="gender"
@@ -90,8 +90,20 @@
             </el-row>
           </template>
         </el-table-column>
-        <el-table-column label="创建日期" prop="created_at" sortable v-if="columns[5].show" />
-        <el-table-column label="最后更新日期" prop="updated_at" sortable v-if="columns[6].show" />
+        <el-table-column
+          label="创建日期"
+          prop="created_at"
+          min-width="220px"
+          sortable
+          v-if="columns[5].show"
+        />
+        <el-table-column
+          label="最后更新日期"
+          prop="updated_at"
+          min-width="220px"
+          sortable
+          v-if="columns[6].show"
+        />
         <el-table-column fixed="right" label="操作" width="150px">
           <template #default="scope">
             <el-dropdown :hide-on-click="false">
