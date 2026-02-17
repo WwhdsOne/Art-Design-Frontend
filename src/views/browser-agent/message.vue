@@ -219,7 +219,7 @@
 
   const fetchTableData = async () => {
     const res = await BrowserAgentDashboardService.getMessagePage({
-      conversation_id: searchForm.conversation_id ? Number(searchForm.conversation_id) : undefined,
+      conversation_id: searchForm.conversation_id,
       state: searchForm.state || undefined,
       page: currentPage.value,
       size: pageSize.value

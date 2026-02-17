@@ -109,7 +109,7 @@ export interface MessagePageData {
 }
 
 export interface MessageQuery {
-  conversation_id?: number
+  conversation_id: string
   state?: string
   page?: number
   size?: number
