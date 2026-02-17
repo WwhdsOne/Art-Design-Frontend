@@ -18,70 +18,68 @@ import {
 } from '@/types/browserAgent'
 
 export class BrowserAgentDashboardService {
-  private static readonly basePath = '/api/browser-agent/dashboard'
-
   // ===== 管理员接口 =====
 
   // 1.1 概览统计
   static getAdminSummary(): Promise<BaseResult<AdminSummary>> {
     return request.get({
-      url: `${this.basePath}/admin/summary`
+      url: '/api/browser-agent/dashboard/admin/summary'
     })
   }
 
   // 1.2 周任务量
   static getAdminWeeklyTaskVolume(): Promise<BaseResult<VolumeData>> {
     return request.get({
-      url: `${this.basePath}/admin/weekly-task-volume`
+      url: '/api/browser-agent/dashboard/admin/weekly-task-volume'
     })
   }
 
   // 1.3 周任务成功率
   static getAdminWeeklyTaskSuccessRate(): Promise<BaseResult<RateData>> {
     return request.get({
-      url: `${this.basePath}/admin/weekly-task-success-rate`
+      url: '/api/browser-agent/dashboard/admin/weekly-task-success-rate'
     })
   }
 
   // 1.4 总任务量
   static getAdminTotalTaskVolume(): Promise<BaseResult<TotalTaskVolume>> {
     return request.get({
-      url: `${this.basePath}/admin/total-task-volume`
+      url: '/api/browser-agent/dashboard/admin/total-task-volume'
     })
   }
 
   // 1.5 任务分类
   static getAdminTaskClassification(): Promise<BaseResult<TaskClassification>> {
     return request.get({
-      url: `${this.basePath}/admin/task-classification`
+      url: '/api/browser-agent/dashboard/admin/task-classification'
     })
   }
 
   // 1.6 周操作量
   static getAdminWeeklyOperationVolume(): Promise<BaseResult<VolumeData>> {
     return request.get({
-      url: `${this.basePath}/admin/weekly-operation-volume`
+      url: '/api/browser-agent/dashboard/admin/weekly-operation-volume'
     })
   }
 
   // 1.7 周操作成功率
   static getAdminWeeklyOperationSuccessRate(): Promise<BaseResult<RateData>> {
     return request.get({
-      url: `${this.basePath}/admin/weekly-operation-success-rate`
+      url: '/api/browser-agent/dashboard/admin/weekly-operation-success-rate'
     })
   }
 
   // 1.8 活跃会话数
   static getAdminActiveSessions(): Promise<BaseResult<ActiveSessions>> {
     return request.get({
-      url: `${this.basePath}/admin/active-sessions`
+      url: '/api/browser-agent/dashboard/admin/active-sessions'
     })
   }
 
   // 1.9 年度任务统计
   static getAdminAnnualTaskStats(year?: number): Promise<BaseResult<AnnualTaskStats>> {
     return request.get({
-      url: `${this.basePath}/admin/annual-task-stats`,
+      url: '/api/browser-agent/dashboard/admin/annual-task-stats',
       params: { year }
     })
   }
@@ -89,7 +87,7 @@ export class BrowserAgentDashboardService {
   // 1.10 热门任务列表
   static getAdminHotTaskList(limit = 6): Promise<BaseResult<HotTaskItem[]>> {
     return request.get({
-      url: `${this.basePath}/admin/hot-task-list`,
+      url: '/api/browser-agent/dashboard/admin/hot-task-list',
       params: { limit }
     })
   }
@@ -99,35 +97,35 @@ export class BrowserAgentDashboardService {
   // 2.1 用户概览统计
   static getUserSummary(): Promise<BaseResult<UserSummary>> {
     return request.get({
-      url: `${this.basePath}/user/summary`
+      url: '/api/browser-agent/dashboard/user/summary'
     })
   }
 
   // 2.2 用户周任务量
   static getUserWeeklyTaskVolume(): Promise<BaseResult<VolumeData>> {
     return request.get({
-      url: `${this.basePath}/user/weekly-task-volume`
+      url: '/api/browser-agent/dashboard/user/weekly-task-volume'
     })
   }
 
   // 2.3 用户周任务成功率
   static getUserWeeklyTaskSuccessRate(): Promise<BaseResult<RateData>> {
     return request.get({
-      url: `${this.basePath}/user/weekly-task-success-rate`
+      url: '/api/browser-agent/dashboard/user/weekly-task-success-rate'
     })
   }
 
   // 2.4 用户任务概述
   static getUserTaskOverview(): Promise<BaseResult<UserTaskOverview>> {
     return request.get({
-      url: `${this.basePath}/user/task-overview`
+      url: '/api/browser-agent/dashboard/user/task-overview'
     })
   }
 
   // 2.5 用户任务趋势
   static getUserTaskTrend(year?: number): Promise<BaseResult<UserTaskTrend>> {
     return request.get({
-      url: `${this.basePath}/user/task-trend`,
+      url: '/api/browser-agent/dashboard/user/task-trend',
       params: { year }
     })
   }
@@ -136,7 +134,7 @@ export class BrowserAgentDashboardService {
 
   static getMessagePage(params: MessageQuery): Promise<BaseResult<MessagePageData>> {
     return request.post({
-      url: `${this.basePath}/admin/messages`,
+      url: '/api/browser-agent/dashboard/admin/messages',
       data: params
     })
   }
@@ -144,7 +142,7 @@ export class BrowserAgentDashboardService {
   // 4. 获取操作动作列表
   static getActions(messageId: string): Promise<BaseResult<ActionItem[]>> {
     return request.get({
-      url: `${this.basePath}/admin/actions`,
+      url: '/api/browser-agent/dashboard/admin/actions',
       params: { message_id: messageId }
     })
   }
