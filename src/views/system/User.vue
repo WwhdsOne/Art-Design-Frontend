@@ -60,7 +60,7 @@
           v-if="columns[6].show"
         >
         </el-table-column>
-        <el-table-column label="手机号" prop="phone" min-width="220px" v-if="columns[1].show" />
+        <el-table-column label="手机号" prop="phone" min-width="140px" v-if="columns[1].show" />
         <el-table-column
           label="性别"
           prop="gender"
@@ -77,7 +77,7 @@
             >
           </template>
         </el-table-column>
-        <el-table-column label="角色" prop="role" v-if="columns[3].show">
+        <el-table-column label="角色" prop="role" v-if="columns[3].show" min-width="120px">
           <template #default="scope">
             <el-row :gutter="20">
               <el-col :span="24">
@@ -93,14 +93,14 @@
         <el-table-column
           label="创建日期"
           prop="created_at"
-          min-width="220px"
+          min-width="180px"
           sortable
           v-if="columns[5].show"
         />
         <el-table-column
           label="最后更新日期"
           prop="updated_at"
-          min-width="220px"
+          min-width="180px"
           sortable
           v-if="columns[6].show"
         />

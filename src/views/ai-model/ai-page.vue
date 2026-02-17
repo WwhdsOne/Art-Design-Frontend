@@ -43,7 +43,7 @@
     >
       <template #default>
         <el-table-column label="ID" prop="id" width="150" v-if="columns[0].show" />
-        <el-table-column label="模型名称" prop="model" width="150" v-if="columns[1].show" />
+        <el-table-column label="模型名称" prop="model" width="250px" v-if="columns[1].show" />
         <el-table-column label="提供商" prop="provider" width="150" v-if="columns[2].show" />
         <el-table-column label="模型官方ID" prop="model_id" width="150" v-if="columns[3].show" />
         <el-table-column label="图标" prop="icon" width="100" v-if="columns[4].show">
@@ -58,7 +58,12 @@
             </el-image>
           </template>
         </el-table-column>
-        <el-table-column label="API 路径" prop="api_path" v-if="columns[5].show" />
+        <el-table-column
+          label="API 路径"
+          prop="api_path"
+          min-width="300px"
+          v-if="columns[5].show"
+        />
         <el-table-column
           label="百万token输入"
           prop="price_prompt_per_1m"

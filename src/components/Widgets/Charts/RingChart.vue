@@ -16,6 +16,7 @@
     showLabel?: boolean
     borderRadius?: number
     centerText?: string
+    showLegend?: boolean
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -30,7 +31,8 @@
     radius: () => ['50%', '80%'],
     showLabel: true,
     borderRadius: 10,
-    centerText: ''
+    centerText: '',
+    showLegend: false
   })
 
   const options: () => EChartsOption = () => {
@@ -67,6 +69,20 @@
           color: props.color
         }
       ]
+    }
+
+    if (props.showLegend) {
+      opt.legend = {
+        orient: 'vertical',
+        right: 10,
+        top: 'center',
+        itemWidth: 10,
+        itemHeight: 10,
+        textStyle: {
+          fontSize: 12,
+          color: '#666'
+        }
+      }
     }
 
     if (props.centerText) {
