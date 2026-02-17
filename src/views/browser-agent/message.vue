@@ -196,7 +196,7 @@
       click: 'success',
       input: 'warning',
       select: 'info',
-      scroll: '',
+      scroll: 'info',
       wait: 'info',
       close_browser: 'danger'
     }
