@@ -91,3 +91,43 @@ export interface UserTaskTrend {
   growth: string
   monthlyData: number[]
 }
+
+// 2.6 用户消息列表
+export interface MessageItem {
+  id: string
+  conversation_id: string
+  content: string
+  state: 'running' | 'finished' | 'error'
+  created_at: string
+}
+
+export interface MessagePageData {
+  page: number
+  size: number
+  total: number
+  data: MessageItem[]
+}
+
+export interface MessageQuery {
+  conversation_id?: number
+  state?: string
+  page?: number
+  size?: number
+}
+
+// 操作动作
+export interface ActionItem {
+  id: string
+  message_id: string
+  action_type: string
+  sequence: number
+  status: string
+  url?: string
+  selector?: string
+  value?: string
+  distance?: number
+  timeout?: number
+  error_message?: string
+  execution_time?: number
+  created_at: string
+}

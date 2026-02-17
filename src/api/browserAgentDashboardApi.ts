@@ -11,7 +11,10 @@ import {
   HotTaskItem,
   UserSummary,
   UserTaskOverview,
-  UserTaskTrend
+  UserTaskTrend,
+  MessageQuery,
+  MessagePageData,
+  ActionItem
 } from '@/types/browserAgent'
 
 export class BrowserAgentDashboardService {
@@ -126,6 +129,23 @@ export class BrowserAgentDashboardService {
     return request.get({
       url: `${this.basePath}/user/task-trend`,
       params: { year }
+    })
+  }
+
+  // 3. 用户任务分页查询
+
+  static getMessagePage(params: MessageQuery): Promise<BaseResult<MessagePageData>> {
+    return request.post({
+      url: `${this.basePath}/admin/messages`,
+      data: params
+    })
+  }
+
+  // 4. 获取操作动作列表
+  static getActions(messageId: string): Promise<BaseResult<ActionItem[]>> {
+    return request.get({
+      url: `${this.basePath}/admin/actions`,
+      params: { message_id: messageId }
     })
   }
 }
