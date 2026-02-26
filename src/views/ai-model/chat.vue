@@ -209,7 +209,7 @@
     })
   }
 
-  // 模拟历史会话数据（真实项目应从 API 获取）
+  // 历史会话数据
   const allSessions = ref<Conversation[]>([])
 
   const startNewSession = () => {
@@ -406,18 +406,22 @@
     const input = userInput.value.trim()
     if (!input) return
 
+    // 推到消息列表里（前端显示可以渲染 HTML）
     messages.value.push({ role: 'user', content: input })
     userInput.value = ''
-
-    const { accessToken } = useUserStore()
     scrollToBottom()
 
+    const { accessToken } = useUserStore()
+
+    // 构造历史消息（向后端发送纯文本，不要 HTML 标签）
     const history = messages.value.map((msg) => ({
       role: msg.role,
-      content: msg.content
+      content:
+        msg.role === 'assistant'
+          ? DOMPurify.sanitize(msg.content, { ALLOWED_TAGS: [] }) // 去掉所有标签
+          : msg.content
     }))
-    console.log('conversation', currentSession.value?.id)
-    // 模型接口
+
     fetchStream('/api/ai/model/chat-completion', accessToken, {
       messages: history,
       id: selectedModelId.value,
@@ -432,9 +436,15 @@
     AIModelService.getHistoryConversationMessages(session.id).then((res) => {
       messages.value = res.data.map((msg) => ({
         ...msg,
+        // 仅渲染前端显示用
         content: msg.role === 'assistant' ? md.render(msg.content) : msg.content
       }))
       scrollToBottom()
+
+      // 加上 Prism 高亮
+      nextTick(() => {
+        Prism.highlightAll()
+      })
     })
   }
 
