@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       # 3. 安装 pnpm (关键修复点)
       - name: Install pnpm
@@ -101,11 +101,5 @@ jobs:
             docker run -d \
               --network docker-compose_app-net \
               --name ${{ env.CONTAINER_NAME }} \
-              -v /etc/letsencrypt/live/www.soyorinlove.cn/fullchain.pem:/app/certs/fullchain.pem \
-              -v /etc/letsencrypt/live/www.soyorinlove.cn/privkey.pem:/app/certs/privkey.pem \
-              -e SSL_CERT_PATH=/app/certs/fullchain.pem \
-              -e SSL_KEY_PATH=/app/certs/privkey.pem \
               --restart unless-stopped \
-              -p 80:80 \
-              -p 443:443 \
               ${{ env.IMAGE_NAME }}:latest
